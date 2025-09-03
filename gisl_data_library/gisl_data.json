@@ -1,0 +1,395 @@
+{
+    "albedo": {
+        "name": "Albedo",
+        "rarity": 5,
+        "element": "Geo",
+        "weapon_type": "Sword",
+        "region": "Mondstadt",
+        "birthday": "September 13th",
+        "affiliation": "Knights of Favonius",
+        "role": "Off-Field / DPS",
+        "additional_titles": [
+            "Chief Alchemist of the Knights of Favonius"
+        ],
+        "constellation_name": "Princeps Cretaceus",
+        "ascension_stat": "Geo DMG Bonus",
+        "ascension_materials": {
+            "gems": {
+                "name": "Prithiva Topaz",
+                "link": "https://genshin-impact.fandom.com/wiki/Prithiva_Topaz"
+            },
+            "boss_mat": {
+                "name": "Basalt Pillar",
+                "link": "https://genshin-impact.fandom.com/wiki/Basalt_Pillar"
+            },
+            "local_specialty": {
+                "name": "Cecilia",
+                "link": "https://genshin-impact.fandom.com/wiki/Cecilia"
+            },
+            "common_mat": {
+                "name": "Divining Scroll",
+                "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll"
+            }
+        },
+        "ascension_levels": {
+            "Prithiva Topaz Sliver": {
+                "A1": {
+                    "level_range": "20 -> 40",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 1,
+                    "link": "https://genshin-impact.fandom.com/wiki/Prithiva_Topaz_Sliver"
+                }
+            },
+            "Cecilia": {
+                "A1": {
+                    "level_range": "20 -> 40",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 3,
+                    "link": "https://genshin-impact.fandom.com/wiki/Cecilia"
+                },
+                "A2": {
+                    "level_range": "40 -> 50",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 10,
+                    "link": "https://genshin-impact.fandom.com/wiki/Cecilia"
+                },
+                "A3": {
+                    "level_range": "50 -> 60",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 20,
+                    "link": "https://genshin-impact.fandom.com/wiki/Cecilia"
+                },
+                "A4": {
+                    "level_range": "60 -> 70",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 30,
+                    "link": "https://genshin-impact.fandom.com/wiki/Cecilia"
+                },
+                "A5": {
+                    "level_range": "70 -> 80",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 45,
+                    "link": "https://genshin-impact.fandom.com/wiki/Cecilia"
+                },
+                "A6": {
+                    "level_range": "80 -> 90",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 60,
+                    "link": "https://genshin-impact.fandom.com/wiki/Cecilia"
+                }
+            },
+            "Divining Scroll": {
+                "A1": {
+                    "level_range": "20 -> 40",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 3,
+                    "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll"
+                },
+                "A2": {
+                    "level_range": "40 -> 50",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 15,
+                    "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll"
+                }
+            },
+            "Prithiva Topaz Fragment": {
+                "A2": {
+                    "level_range": "40 -> 50",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 3,
+                    "link": "https://genshin-impact.fandom.com/wiki/Prithiva_Topaz_Fragment"
+                },
+                "A3": {
+                    "level_range": "50 -> 60",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 6,
+                    "link": "https://genshin-impact.fandom.com/wiki/Prithiva_Topaz_Fragment"
+                }
+            },
+            "Basalt Pillar": {
+                "A2": {
+                    "level_range": "40 -> 50",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 2,
+                    "link": "https://genshin-impact.fandom.com/wiki/Basalt_Pillar"
+                },
+                "A3": {
+                    "level_range": "50 -> 60",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 4,
+                    "link": "https://genshin-impact.fandom.com/wiki/Basalt_Pillar"
+                },
+                "A4": {
+                    "level_range": "60 -> 70",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 8,
+                    "link": "https://genshin-impact.fandom.com/wiki/Basalt_Pillar"
+                },
+                "A5": {
+                    "level_range": "70 -> 80",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 12,
+                    "link": "https://genshin-impact.fandom.com/wiki/Basalt_Pillar"
+                },
+                "A6": {
+                    "level_range": "80 -> 90",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 20,
+                    "link": "https://genshin-impact.fandom.com/wiki/Basalt_Pillar"
+                }
+            },
+            "Sealed Scroll": {
+                "A3": {
+                    "level_range": "50 -> 60",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 12,
+                    "link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll"
+                },
+                "A4": {
+                    "level_range": "60 -> 70",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 18,
+                    "link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll"
+                }
+            },
+            "Prithiva Topaz Chunk": {
+                "A4": {
+                    "level_range": "60 -> 70",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 3,
+                    "link": "https://genshin-impact.fandom.com/wiki/Prithiva_Topaz_Chunk"
+                },
+                "A5": {
+                    "level_range": "70 -> 80",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 6,
+                    "link": "https://genshin-impact.fandom.com/wiki/Prithiva_Topaz_Chunk"
+                }
+            },
+            "Forbidden Curse Scroll": {
+                "A5": {
+                    "level_range": "70 -> 80",
+                    "stats_gained": "HP, DEF, ATK",
+                    "amount": 12,
+                    "link": "https://genshin-impact.fandom.com/wiki/Forbidden_Curse_Scroll"
+                },
+                "A6": {
+                    "level_range": "80 -> 90",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 24,
+                    "link": "https://genshin-impact.fandom.com/wiki/Forbidden_Curse_Scroll"
+                }
+            },
+            "Prithiva Topaz Gemstone": {
+                "A6": {
+                    "level_range": "80 -> 90",
+                    "stats_gained": "Geo DMG Bonus",
+                    "amount": 6,
+                    "link": "https://genshin-impact.fandom.com/wiki/Prithiva_Topaz_Gemstone"
+                }
+            }
+        },
+        "stats_table": {
+            "A1": {
+                "level_range": "1 -> 20",
+                "HP": { "low": 1030, "high": 2577 },
+                "ATK": { "low": 6.8, "high": 17.1 },
+                "DEF": { "low": 69.4, "high": 173.4 },
+                "Geo DMG Bonus": { "low": "0.0%", "high": "0.0%" }
+            },
+            "A2": {
+                "level_range": "20 -> 40",
+                "HP": { "low": 2577, "high": 3532 },
+                "ATK": { "low": 17.1, "high": 23.5 },
+                "DEF": { "low": 173.4, "high": 238.1 },
+                "Geo DMG Bonus": { "low": "0.0%", "high": "7.2%" }
+            },
+            "A3": {
+                "level_range": "40 -> 50",
+                "HP": { "low": 3532, "high": 4252 },
+                "ATK": { "low": 23.5, "high": 28.3 },
+                "DEF": { "low": 238.1, "high": 286.9 },
+                "Geo DMG Bonus": { "low": "7.2%", "high": "7.2%" }
+            },
+            "A4": {
+                "level_range": "50 -> 60",
+                "HP": { "low": 4252, "high": 4983 },
+                "ATK": { "low": 28.3, "high": 33.2 },
+                "DEF": { "low": 286.9, "high": 336.5 },
+                "Geo DMG Bonus": { "low": "7.2%", "high": "14.4%" }
+            },
+            "A5": {
+                "level_range": "60 -> 70",
+                "HP": { "low": 4983, "high": 5724 },
+                "ATK": { "low": 33.2, "high": 38.1 },
+                "DEF": { "low": 336.5, "high": 386.9 },
+                "Geo DMG Bonus": { "low": "14.4%", "high": "14.4%" }
+            },
+            "A6": {
+                "level_range": "70 -> 80",
+                "HP": { "low": 5724, "high": 6475 },
+                "ATK": { "low": 38.1, "high": 43.1 },
+                "DEF": { "low": 386.9, "high": 438.1 },
+                "Geo DMG Bonus": { "low": "14.4%", "high": "21.6%" }
+            }
+        },
+        "talents": [
+            {
+                "name": "Favonius Bladework - Weiss",
+                "type": "Normal Attack",
+                "description": "Performs up to 5 consecutive strikes.",
+                "level_materials": {
+                    "level_2-3": [
+                        { "material": "Teachings of Ballad", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad" },
+                        { "material": "Divining Scroll", "amount": "6-3", "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll" }
+                    ],
+                    "level_4-6": [
+                        { "material": "Guide to Ballad", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Guide_to_Ballad" },
+                        { "material": "Sealed Scroll", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll" }
+                    ]
+                }
+            },
+            {
+                "name": "Abiogenesis: Solar Isotoma",
+                "type": "Elemental Skill",
+                "description": "Albedo creates a Solar Isotoma, which deals AoE Geo DMG on creation. It generates Transient Blossoms when opponents in its area take damage. These blossoms deal AoE Geo DMG. When a character stands on the Solar Isotoma's area, it will crystallize into a Geo structure that can be climbed, lifting the character to a certain height.",
+                "level_materials": {
+                    "level_2-3": [
+                        { "material": "Teachings of Ballad", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad" },
+                        { "material": "Divining Scroll", "amount": "6-3", "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll" }
+                    ],
+                    "level_4-6": [
+                        { "material": "Guide to Ballad", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Guide_to_Ballad" },
+                        { "material": "Sealed Scroll", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll" }
+                    ]
+                }
+            },
+            {
+                "name": "Rite of Progeniture: Tectonic Tide",
+                "type": "Elemental Burst",
+                "description": "Albedo summons a crystallized Geo field that deals a single instance of AoE Geo DMG, then instantly generates 7 Fatal Blossoms that burst and deal AoE Geo DMG. If a Solar Isotoma from Abiogenesis: Solar Isotoma is on the field, it will generate additional Fatal Blossoms at its location.",
+                "level_materials": {}
+            }
+        ],
+        "constellations": [
+            {
+                "name": "C1: Sun of Wit",
+                "description": "When Transient Blossoms generated by Abiogenesis: Solar Isotoma are triggered, Albedo regenerates 1.2 Energy for himself."
+            },
+            {
+                "name": "C2: Opening of Phanerozoic",
+                "description": "Transient Blossoms generated by Abiogenesis: Solar Isotoma grant a stack of Transient Blossom for 30s. Each stack increases the damage of Rite of Progeniture: Tectonic Tide by 25% of Albedo's DEF. Max 4 stacks. After the burst, all stacks are consumed."
+            },
+            {
+                "name": "C3: Grace of Phaisic",
+                "description": "Increases the Level of Abiogenesis: Solar Isotoma by 3. Maximum upgrade level is 15."
+            },
+            {
+                "name": "C4: Descent of Divinity",
+                "description": "Solar Isotoma increases plunging attack DMG by 30% for characters in the AoE."
+            },
+            {
+                "name": "C5: Tides of Phaisic",
+                "description": "Increases the Level of Rite of Progeniture: Tectonic Tide by 3. Maximum upgrade level is 15."
+            },
+            {
+                "name": "C6: Dust of Phaisic",
+                "description": "Characters in the AoE of the Solar Isotoma who are protected by a shield created by Crystallize have their DMG increased by 17%."
+            }
+        ]
+    },
+    "kazuha": {
+        "name": "Kaedehara Kazuha",
+        "rarity": 5,
+        "element": "Anemo",
+        "weapon_type": "Sword",
+        "region": "Inazuma",
+        "birthday": "October 29th",
+        "affiliation": "The Crux Fleet",
+        "role": "Support / Sub-DPS",
+        "constellation_name": "Acer Palmatum",
+        "ascension_stat": "Elemental Mastery",
+        "ascension_materials": {
+            "gems": {
+                "name": "Vayuda Turquoise",
+                "link": "https://genshin-impact.fandom.com/wiki/Vayuda_Turquoise"
+            },
+            "boss_mat": {
+                "name": "Marionette Core",
+                "link": "https://genshin-impact.fandom.com/wiki/Marionette_Core"
+            },
+            "local_specialty": {
+                "name": "Sea Ganoderma",
+                "link": "https://genshin-impact.fandom.com/wiki/Sea_Ganoderma"
+            },
+            "common_mat": {
+                "name": "Treasure Hoarder Insignia",
+                "link": "https://genshin-impact.fandom.com/wiki/Treasure_Hoarder_Insignia"
+            }
+        },
+        "talents": [
+            {
+                "name": "Garyuu Bladework",
+                "type": "Normal Attack",
+                "description": "Performs up to 5 consecutive strikes.",
+                "level_materials": {
+                    "level_2-3": [
+                        { "material": "Teachings of Diligence", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Diligence" },
+                        { "material": "Treasure Hoarder Insignia", "amount": "6-3", "link": "https://genshin-impact.fandom.com/wiki/Treasure_Hoarder_Insignia" }
+                    ],
+                    "level_4-6": [
+                        { "material": "Guide to Diligence", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Guide_to_Diligence" },
+                        { "material": "Silver Raven Insignia", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Silver_Raven_Insignia" }
+                    ]
+                }
+            },
+            {
+                "name": "Chihayaburu",
+                "type": "Elemental Skill",
+                "description": "Unleashes a rushing wind, pulling enemies and objects towards Kazuha's position before launching him. The wind then deals Anemo DMG and creates an updraft, which Kazuha can use to perform a plunging attack.",
+                "level_materials": {
+                    "level_2-3": [
+                        { "material": "Teachings of Diligence", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Diligence" },
+                        { "material": "Treasure Hoarder Insignia", "amount": "6-3", "link": "https://genshin-impact.fandom.com/wiki/Treasure_Hoarder_Insignia" }
+                    ],
+                    "level_4-6": [
+                        { "material": "Guide to Diligence", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Guide_to_Diligence" },
+                        { "material": "Silver Raven Insignia", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Silver_Raven_Insignia" }
+                    ]
+                }
+            },
+            {
+                "name": "Kazuha Slash",
+                "type": "Elemental Burst",
+                "description": "Unleashes a single blow that deals AoE Anemo DMG and creates a large Autumn Whirlwind field. This field continuously deals Anemo DMG to opponents and can be infused with Hydro, Pyro, Cryo, or Electro.",
+                "level_materials": {}
+            }
+        ],
+        "constellations": [
+            {
+                "name": "C1: Scarlet Leaves Pursue Wild Winds",
+                "description": "Decreases Chihayaburu's CD by 10%. Using Kazuha Slash or Chihayaburu resets the CD of Chihayaburu."
+            },
+            {
+                "name": "C2: Yamaarashi Tailwind",
+                "description": "The Autumn Whirlwind field created by Kazuha Slash has the following effects: Increases Kazuha's Elemental Mastery by 200 and grants all characters within the field an Elemental Mastery buff equal to 20% of Kazuha's Elemental Mastery."
+            },
+            {
+                "name": "C3: Maple's Greeting",
+                "description": "Increases the Level of Chihayaburu by 3. Maximum upgrade level is 15."
+            },
+            {
+                "name": "C4: Oishii no Kaze",
+                "description": "When Kazuha's Energy is less than 45, he regenerates 3 or 4 Energy when he uses Chihayaburu."
+            },
+            {
+                "name": "C5: Maple's Invitation",
+                "description": "Increases the Level of Kazuha Slash by 3. Maximum upgrade level is 15."
+            },
+            {
+                "name": "C6: Crimson Momiji",
+                "description": "After using Chihayaburu or Kazuha Slash, Kazuha gains a 0.2% Anemo DMG Bonus for every point of his Elemental Mastery. This bonus stacks up to 20 times and lasts for 5s."
+            }
+        ]
+    }
+}
