@@ -6,6 +6,9 @@ GI-Static-Data-Library
 # -Update 0.0.3-
   * Fixed a json error.
 
+# -Update 0.0.4-
+  * Fixed multiple json errors. :<
+
 *** Major disclaimer: I did use AI for this. I'm new, but I will slowly change the code using my knowledge as I continue adding more stuff to this library :3
 
 A simple Python library for retrieving Genshin Impact character and material data from a JSON file.

@@ -1,9 +1,0 @@
-README.md
-setup.py
-gisl_data_library/__init__.py
-gisl_data_library/gisl.py
-gisl_data_library/gisl_data.json
-gisl_data_library.egg-info/PKG-INFO
-gisl_data_library.egg-info/SOURCES.txt
-gisl_data_library.egg-info/dependency_links.txt
-gisl_data_library.egg-info/top_level.txt
