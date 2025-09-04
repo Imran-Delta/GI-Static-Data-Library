@@ -1,1 +1,1 @@
-from .gisl_data import get_character_data, find_characters_by_material, find_characters_by_element, find_characters_by_weapon_type
+from .gisl import get_character_data, find_characters_by_material, find_characters_by_element, find_characters_by_weapon_type

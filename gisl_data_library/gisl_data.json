@@ -190,54 +190,61 @@
             }
         },
         "stats_table": {
-            "A1": {
+            "A0": {
                 "level_range": "1 -> 20",
-                "HP": { "low": 1030, "high": 2577 },
-                "ATK": { "low": 6.8, "high": 17.1 },
-                "DEF": { "low": 69.4, "high": 173.4 },
+                "HP": { "low": 1029, "high": 2670 },
+                "ATK": { "low": 19.55, "high": 50.72 },
+                "DEF": { "low": 68.21, "high": 176.93 },
                 "Geo DMG Bonus": { "low": "0.0%", "high": "0.0%" }
             },
+			"A1": {
+				"level_range": "20 -> 40",
+                "HP": { "low": 3553, "high": 5317 },
+                "ATK": { "low": 67.48, "high": 100.97 },
+                "DEF": { "low": 235.41 "high": 352.25 },
+                "Geo DMG Bonus": { "low": "0.0%", "high": "0.0%" }
+			},
             "A2": {
-                "level_range": "20 -> 40",
-                "HP": { "low": 2577, "high": 3532 },
-                "ATK": { "low": 17.1, "high": 23.5 },
-                "DEF": { "low": 173.4, "high": 238.1 },
+                "level_range": "40 -> 50",
+                "HP": { "low": 5944, "high": 6,839 },
+                "ATK": { "low": 112.88, "high": 129.87 },
+                "DEF": { "low": 393.80, "high": 453.07 },
                 "Geo DMG Bonus": { "low": "0.0%", "high": "7.2%" }
             },
             "A3": {
-                "level_range": "40 -> 50",
-                "HP": { "low": 3532, "high": 4252 },
-                "ATK": { "low": 23.5, "high": 28.3 },
-                "DEF": { "low": 238.1, "high": 286.9 },
-                "Geo DMG Bonus": { "low": "7.2%", "high": "7.2%" }
+                "level_range": "50 -> 60",
+                "HP": { "low": 7675, "high": 8579 },
+                "ATK": { "low": 145.75, "high": 162.91 },
+                "DEF": { "low": 508.47, "high": 568.36 },
+                "Geo DMG Bonus": { "low": "7.2%", "high": "14.4%" }
             },
             "A4": {
-                "level_range": "50 -> 60",
+                "level_range": "60 -> 70",
                 "HP": { "low": 4252, "high": 4983 },
                 "ATK": { "low": 28.3, "high": 33.2 },
                 "DEF": { "low": 286.9, "high": 336.5 },
                 "Geo DMG Bonus": { "low": "7.2%", "high": "14.4%" }
             },
             "A5": {
-                "level_range": "60 -> 70",
-                "HP": { "low": 4983, "high": 5724 },
-                "ATK": { "low": 33.2, "high": 38.1 },
-                "DEF": { "low": 336.5, "high": 386.9 },
-                "Geo DMG Bonus": { "low": "14.4%", "high": "14.4%" }
+                "level_range": "70 -> 80",
+                "HP": { "low": 10746, "high": 11668 },
+                "ATK": { "low": 204.06, "high": 221.57 },
+                "DEF": { "low": 711.90, "high": 773.01 },
+                "Geo DMG Bonus": { "low": "14.4%", "high": "21.6%" }
             },
             "A6": {
-                "level_range": "70 -> 80",
-                "HP": { "low": 5724, "high": 6475 },
-                "ATK": { "low": 38.1, "high": 43.1 },
-                "DEF": { "low": 386.9, "high": 438.1 },
-                "Geo DMG Bonus": { "low": "14.4%", "high": "21.6%" }
+                "level_range": "80 -> 90",
+                "HP": { "low": 12295, "high": 13225.58 },
+                "ATK": { "low": 233.48, "high": 251.14 },
+                "DEF": { "low": 814.56, "high": 876.15 },
+                "Geo DMG Bonus": { "low": "14.4%", "high": "28.8%" }
             }
         },
         "talents": [
             {
                 "name": "Favonius Bladework - Weiss",
                 "type": "Normal Attack",
-                "description": "Performs up to 5 consecutive strikes.",
+                "description": "Normal Attack\nPerforms up to 5 rapid strikes.\n\nCharged Attack\nConsumes a certain amount of Stamina to unleash 2 rapid sword strikes.\n\nPlunging Attack\nPlunges from mid-air to strike the ground below, damaging opponents along the path and dealing AoE DMG upon impact.",
                 "level_materials": {
                     "level_2-3": [
                         { "material": "Teachings of Ballad", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad" },
@@ -252,7 +259,7 @@
             {
                 "name": "Abiogenesis: Solar Isotoma",
                 "type": "Elemental Skill",
-                "description": "Albedo creates a Solar Isotoma, which deals AoE Geo DMG on creation. It generates Transient Blossoms when opponents in its area take damage. These blossoms deal AoE Geo DMG. When a character stands on the Solar Isotoma's area, it will crystallize into a Geo structure that can be climbed, lifting the character to a certain height.",
+                "description": "Albedo creates a Solar Isotoma using alchemy, which deals AoE Geo DMG on appearance.\n\nSolar Isotoma\nhas the following properties:\nWhen opponents within the Solar Isotoma field take DMG, the Solar Isotoma will generate Transient Blossoms which deal AoE Geo DMG. DMG dealt scales off Albedo's DEF.\nTransient Blossoms can only be generated once every 2s.\nWhen a character is located at the locus of the Solar Isotoma, the Solar Isotoma will accumulate Geo power to form a crystallized platform that lifts the character up to a certain height. Only one crystallized platform can exist at a time.\nSolar Isotoma is considered a Geo construct. Only one Solar Isotoma created by Albedo himself can exist at a time.",
                 "level_materials": {
                     "level_2-3": [
                         { "material": "Teachings of Ballad", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad" },
@@ -267,34 +274,52 @@
             {
                 "name": "Rite of Progeniture: Tectonic Tide",
                 "type": "Elemental Burst",
-                "description": "Albedo summons a crystallized Geo field that deals a single instance of AoE Geo DMG, then instantly generates 7 Fatal Blossoms that burst and deal AoE Geo DMG. If a Solar Isotoma from Abiogenesis: Solar Isotoma is on the field, it will generate additional Fatal Blossoms at its location.",
+                "description": "Under Albedo's command, Geo crystals surge and burst forth, dealing AoE Geo DMG in front of him.\nIf a Solar Isotoma created by Albedo himself is on the field, 7 Fatal Blossoms will be generated in the Solar Isotoma field, bursting violently into bloom and dealing AoE Geo DMG.\n\nTectonic Tide DMG and Fatal Blossom DMG will not generate Transient Blossoms.",
                 "level_materials": {}
-            }
+            },
+			{
+				"name": "Calcite Might",
+				"type": "1st Ascension Passive",
+				"description": "Transient Blossoms generated by Abiogenesis: Solar Isotoma deal 25% more DMG to opponents whose HP is below 50%.",
+				"level_materials": "A1"
+			},
+			{
+				"name": "Homuncular Nature",
+				"type": "4th Ascension Passive",
+				"description": "Using Rite of Progeniture: Tectonic Tide increases the Elemental Mastery of nearby party members by 125 for 10s.",
+				"level_materials": "A4"
+			},
+			{
+				"name": "Flash of Genius",
+				"type": "Utility Passive",
+				"description": "When Albedo crafts Weapon Ascension Materials, he has a 10% chance to receive double the product.",
+				"level_materials": "Utiliy (Auto-unlocked)"
+			}
         ],
         "constellations": [
             {
-                "name": "C1: Sun of Wit",
-                "description": "When Transient Blossoms generated by Abiogenesis: Solar Isotoma are triggered, Albedo regenerates 1.2 Energy for himself."
+                "name": "C1: Flower of Eden",
+                "description": "Transient Blossoms generated by Albedo's Abiogenesis: Solar Isotoma regenerate 1.2 Energy for Albedo."
             },
             {
                 "name": "C2: Opening of Phanerozoic",
-                "description": "Transient Blossoms generated by Abiogenesis: Solar Isotoma grant a stack of Transient Blossom for 30s. Each stack increases the damage of Rite of Progeniture: Tectonic Tide by 25% of Albedo's DEF. Max 4 stacks. After the burst, all stacks are consumed."
+                "description": "Transient Blossoms generated by Abiogenesis: Solar Isotoma grant Albedo Fatal Reckoning for 30s:\n\n*Unleashing Rite of Progeniture: Tectonic Tide consumes all stacks of Fatal Reckoning. Each stack of Fatal Reckoning consumed increases the DMG dealt by Fatal Blossoms and Rite of Progeniture: Tectonic Tide's burst DMG by 30% of Albedo's DEF.\nThis effect stacks up to 4 times."
             },
             {
-                "name": "C3: Grace of Phaisic",
-                "description": "Increases the Level of Abiogenesis: Solar Isotoma by 3. Maximum upgrade level is 15."
+                "name": "C3: Grace of Helios",
+                "description": "Increases the Level of Abiogenesis: Solar Isotoma by 3.\nMaximum upgrade level is 15."
             },
             {
                 "name": "C4: Descent of Divinity",
-                "description": "Solar Isotoma increases plunging attack DMG by 30% for characters in the AoE."
+                "description": "Active party members within the Solar Isotoma field have their Plunging Attack DMG increased by 30%."
             },
             {
-                "name": "C5: Tides of Phaisic",
-                "description": "Increases the Level of Rite of Progeniture: Tectonic Tide by 3. Maximum upgrade level is 15."
+                "name": "C5: Tide of Hadean",
+                "description": "Increases the Level of Rite of Progeniture: Tectonic Tide by 3.\nMaximum upgrade level is 15."
             },
             {
-                "name": "C6: Dust of Phaisic",
-                "description": "Characters in the AoE of the Solar Isotoma who are protected by a shield created by Crystallize have their DMG increased by 17%."
+                "name": "C6: Dust of Purification",
+                "description": "Active party members within the Solar Isotoma field who are protected by a shield created by Crystallize have their DMG increased by 17%."
             }
         ]
     },

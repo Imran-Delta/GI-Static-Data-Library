@@ -1,4 +1,10 @@
 GI-Static-Data-Library
+# -Update 0.0.2-
+ * Added Albedo
+ * Changed the gisl.py lookup system
+
+** Major disclaimer: I did use AI for this. I'm new, but I will slowly change the code using my knowledge as I continue adding more stuff to this library :3
+
 A simple Python library for retrieving Genshin Impact character and material data from a JSON file.
 
 Features
@@ -31,21 +37,6 @@ import json
 
 characters_with_cecilia = find_characters_by_material("Cecilia")
 print(json.dumps(characters_with_cecilia, indent=2))
-
-Contributing
-Contributions are welcome! If you would like to add new data or improve existing data, please:
-
-Fork the repository.
-
-Create a new branch (git checkout -b feature/your-feature-name).
-
-Add your changes.
-
-Commit your changes (git commit -m "Add new feature").
-
-Push to the branch (git push origin feature/your-feature-name).
-
-Create a pull request on GitHub.
 
 License
 This project is licensed under the MIT License.

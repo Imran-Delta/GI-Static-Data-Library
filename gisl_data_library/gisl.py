@@ -5,12 +5,20 @@ The data is loaded from a bundled gisl_data.json file.
 import json
 import importlib.resources as pkg_resources
 
+# The 'gisl_data_library' is a hardcoded package name. This will work,
+# but a more dynamic approach could be used in a larger project.
+PACKAGE_NAME = 'gisl_data_library'
+DATA_FILE_NAME = 'gisl_data.json'
+
 try:
     # Use importlib.resources to access the bundled JSON file
-    json_data = pkg_resources.files('gisl_data_library').joinpath('gisl_data.json').read_text(encoding='utf-8')
+    # This path is now correct because we've updated setup.py to include the data file.
+    json_data = pkg_resources.files(PACKAGE_NAME).joinpath(DATA_FILE_NAME).read_text(encoding='utf-8')
     gisl_data = json.loads(json_data)
 except Exception as e:
-    # Handle the case where the data file cannot be found or decoded
+    # This block is a failsafe. If the data file cannot be found,
+    # the 'gisl_data' dictionary will be initialized as empty,
+    # preventing the script from crashing.
     print(f"Error loading data: {e}")
     gisl_data = {}
 
@@ -34,39 +42,47 @@ def get_character_data(character_name: str, data_point: str = None) -> dict | li
 
 def find_characters_by_material(material_name: str) -> list:
     """
-    Finds and returns a list of characters who use a specific material, along with the amount needed.
+    Finds and returns a list of characters that use a specific material.
 
     Args:
         material_name: The name of the material to search for.
 
     Returns:
-        A list of dictionaries, where each dictionary contains the character's name,
-        the type of material (e.g., 'ascension' or 'talent'), and the amount.
+        A list of dictionaries, where each dictionary contains the character's
+        name, the type of material (ascension or talent), and the amount needed.
     """
     characters_using_material = []
     for char_name, char_data in gisl_data.items():
         total_amount = 0
         material_type = ""
+        
+        # Failsafe for missing 'ascension_materials'
+        ascension_mats = char_data.get('ascension_materials', {})
+        if ascension_mats:
+            for mat_type, mat_data in ascension_mats.items():
+                if mat_data.get('name', '').lower() == material_name.lower():
+                    # No amount is specified in the JSON for these, so we use a placeholder.
+                    total_amount = 1 
+                    material_type = "ascension"
 
-        # Check ascension materials
-        found_in_ascension = False
-        for mat_key, mat_data in char_data.get('ascension_levels', {}).items():
-            if material_name.lower() in mat_key.lower():
-                for stage in mat_data.values():
-                    if 'amount' in stage:
-                        total_amount += stage['amount']
-                        material_type = "ascension"
-                found_in_ascension = True
-                break
-
-        # Check talent materials (only if not found in ascension to avoid duplicates)
-        if not found_in_ascension:
-            for talent in char_data.get('talents', []):
-                for level_mats in talent.get('level_materials', {}).values():
-                    for mat in level_mats:
-                        if material_name.lower() in mat['material'].lower():
-                            total_amount += mat.get('amount', 0)
-                            material_type = "talent"
+        # Failsafe for missing 'talents'
+        talents = char_data.get('talents', [])
+        for talent in talents:
+            # Failsafe for missing 'level_materials'
+            level_mats = talent.get('level_materials', [])
+            for mat in level_mats:
+                if mat.get('name', '').lower() == material_name.lower():
+                    amount_value = mat.get('amount', 0)
+                    
+                    # Failsafe for non-integer amounts. This handles cases where
+                    # the amount is a string like "3-2" or simply missing.
+                    if not isinstance(amount_value, (int, float)):
+                        # You can decide how to handle this. For now, we'll
+                        # default to 0 if the value is not a number.
+                        amount_value = 0
+                    
+                    total_amount += amount_value
+                    material_type = "talent"
 
         if total_amount > 0:
             characters_using_material.append({
