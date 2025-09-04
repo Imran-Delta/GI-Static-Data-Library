@@ -1,12 +1,24 @@
+Metadata-Version: 2.4
+Name: gisl-data-library
+Version: 0.0.2
+Summary: A simple Python library for retrieving Genshin Impact character and material data from a JSON file. This is a work in progress.
+Home-page: https://github.com/Imran-Delta/GI-Static-Data-Library
+Author: Imran Bin Gifary (System Delta or Imran Delta Online)
+Author-email: imran.sdelta@gmail.com
+Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: summary
+
 GI-Static-Data-Library
 # -Update 0.0.2-
  * Added Albedo
  * Changed the gisl.py lookup system
 
-# -Update 0.0.3-
-  * Fixed a json error.
-
-*** Major disclaimer: I did use AI for this. I'm new, but I will slowly change the code using my knowledge as I continue adding more stuff to this library :3
+** Major disclaimer: I did use AI for this. I'm new, but I will slowly change the code using my knowledge as I continue adding more stuff to this library :3
 
 A simple Python library for retrieving Genshin Impact character and material data from a JSON file.
 

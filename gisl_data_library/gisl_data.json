@@ -201,7 +201,7 @@
 				"level_range": "20 -> 40",
                 "HP": { "low": 3553, "high": 5317 },
                 "ATK": { "low": 67.48, "high": 100.97 },
-                "DEF": { "low": 235.41 "high": 352.25 },
+                "DEF": { "low": 235.41, "high": 352.25 },
                 "Geo DMG Bonus": { "low": "0.0%", "high": "0.0%" }
 			},
             "A2": {
