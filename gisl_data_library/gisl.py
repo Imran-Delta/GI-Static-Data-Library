@@ -43,6 +43,7 @@ def get_character_data(character_name: str, data_point: str = None) -> dict | li
 def find_characters_by_material(material_name: str) -> list:
     """
     Finds and returns a list of characters that use a specific material.
+    Handles potential inconsistencies in the JSON structure.
 
     Args:
         material_name: The name of the material to search for.
@@ -56,42 +57,69 @@ def find_characters_by_material(material_name: str) -> list:
         total_amount = 0
         material_type = ""
         
-        # Failsafe for missing 'ascension_materials'
-        ascension_mats = char_data.get('ascension_materials', {})
-        if ascension_mats:
-            # The keys of ascension_mats are the material names themselves
-            for mat_name_key, levels_data in ascension_mats.items(): # Renamed for clarity
-                if mat_name_key.lower() == material_name.lower():
-                    # We need to sum up the amounts from all levels (A1, A2, etc.)
-                    # for this material for this character.
-                    for level_key, level_info in levels_data.items():
-                        amount_value = level_info.get('amount', 0)
-                        if isinstance(amount_value, (int, float)):
-                            total_amount += amount_value
-                    material_type = "ascension"
+        # Check ascension materials
+        ascension_mats_dict = char_data.get('ascension_materials')
+        if isinstance(ascension_mats_dict, dict): # Ensure it's a dictionary
+            # Iterate through the categories (gems, boss_mat, etc.)
+            for category, material_info in ascension_mats_dict.items():
+                # Ensure the material_info is a dictionary before accessing its 'name'
+                if isinstance(material_info, dict):
+                    if material_info.get('name', '').lower() == material_name.lower():
+                        # Note: Ascension materials don't have a specific 'amount' in the provided structure.
+                        # We'll use a placeholder of 1 for simplicity if found.
+                        total_amount = 1 
+                        material_type = "ascension"
+                        # If you find it as an ascension material, we can break from this inner loop
+                        # to avoid double-counting if it's also a talent material.
+                        break 
+            # If we found it as an ascension material, add it and continue to the next character
+            if total_amount > 0 and material_type == "ascension":
+                characters_using_material.append({
+                    "character": char_data['name'],
+                    "material_type": material_type,
+                    "amount": total_amount
+                })
+                continue # Move to the next character to avoid talent material checks for this one
 
-        # Failsafe for missing 'talents'
+        # Check talent materials (only if not found as an ascension material for this char)
         talents = char_data.get('talents', [])
-        for talent in talents:
-            # Failsafe for missing 'level_materials'
-            level_mats = talent.get('level_materials', [])
-            for mat in level_mats:
-                if mat.get('name', '').lower() == material_name.lower():
-                    amount_value = mat.get('amount', 0)
-                    
-                    # Failsafe for non-integer amounts. This handles cases where
-                    # the amount is a string like "3-2" or simply missing.
-                    if not isinstance(amount_value, (int, float)):
-                        # You can decide how to handle this. For now, we'll
-                        # default to 0 if the value is not a number.
-                        amount_value = 0
-                    
-                    total_amount += amount_value
-                    material_type = "talent"
+        if isinstance(talents, list): # Ensure talents is a list
+            for talent in talents:
+                if isinstance(talent, dict): # Ensure talent is a dict
+                    level_mats = talent.get('level_materials', [])
+                    if isinstance(level_mats, dict): # Check if level_mats is a dict, not a list of dicts
+                        # Iterate through the level materials (e.g., "level_2-3", "level_4-6")
+                        for level_range_key, materials_in_level in level_mats.items():
+                            # materials_in_level is expected to be a list of material dicts
+                            if isinstance(materials_in_level, list):
+                                for mat in materials_in_level:
+                                    if isinstance(mat, dict): # Ensure mat is a dict
+                                        if mat.get('name', '').lower() == material_name.lower():
+                                            amount_value = mat.get('amount', 0)
+                                            
+                                            # Handle non-numeric amounts like "3-2"
+                                            if isinstance(amount_value, str):
+                                                try:
+                                                    # Try to parse ranges like "3-2" into the first number for simplicity
+                                                    # or sum them if they are separated by '+'
+                                                    if '-' in amount_value:
+                                                        amount_value = int(amount_value.split('-')[0])
+                                                    elif '+' in amount_value:
+                                                        amount_value = sum(int(n) for n in amount_value.split('+'))
+                                                    else:
+                                                        amount_value = int(amount_value)
+                                                except ValueError:
+                                                    amount_value = 0 # Default to 0 if parsing fails
+                                            elif not isinstance(amount_value, (int, float)):
+                                                amount_value = 0 # Default to 0 if not a number or string
 
-        if total_amount > 0:
+                                            total_amount += amount_value
+                                            material_type = "talent"
+                    
+        # If any amount was found for talent materials, add it
+        if total_amount > 0 and material_type == "talent":
             characters_using_material.append({
-                "character": char_data.get('name', 'Unknown Character'), # Added failsafe for character name
+                "character": char_data['name'],
                 "material_type": material_type,
                 "amount": total_amount
             })

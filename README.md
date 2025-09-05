@@ -1,17 +1,20 @@
 GI-Static-Data-Library
-# -Update 0.0.2-
- * Added Albedo
- * Changed the gisl.py lookup system
-
-# -Update 0.0.3 to 0.0.5-
-  * Fixed a json error.
-  * Fixed multiple json errors. :<
-  * I FORGOT TO SAVE THE ERROR FIXES
+# -Update 0.0.7-
+	* Trying to fix the same error that I tried to fix on 0.0.6.
 
 # -Update 0.0.6-
 	* Fixed an issue with retrieving character list by mats/element/weapon.
+	
+# -Update 0.0.3 to 0.0.5-
+	* Fixed a json error.
+	* Fixed multiple json errors. :<
+	* I FORGOT TO SAVE THE ERROR FIXES
+  
+# -Update 0.0.2-
+	* Added Albedo
+	* Changed the gisl.py lookup system
 
-*** Major disclaimer: I did use AI for this. I'm new, but I will slowly change the code using my knowledge as I continue adding more stuff to this library :3
+	*** Major disclaimer: I did use AI for this. I'm new, but I will slowly change the code using my knowledge as I continue adding more stuff to this library :3
 
 A simple Python library for retrieving Genshin Impact character and material data from a JSON file.
 
