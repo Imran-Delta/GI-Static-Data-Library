@@ -59,10 +59,15 @@ def find_characters_by_material(material_name: str) -> list:
         # Failsafe for missing 'ascension_materials'
         ascension_mats = char_data.get('ascension_materials', {})
         if ascension_mats:
-            for mat_type, mat_data in ascension_mats.items():
-                if mat_data.get('name', '').lower() == material_name.lower():
-                    # No amount is specified in the JSON for these, so we use a placeholder.
-                    total_amount = 1 
+            # The keys of ascension_mats are the material names themselves
+            for mat_name_key, levels_data in ascension_mats.items(): # Renamed for clarity
+                if mat_name_key.lower() == material_name.lower():
+                    # We need to sum up the amounts from all levels (A1, A2, etc.)
+                    # for this material for this character.
+                    for level_key, level_info in levels_data.items():
+                        amount_value = level_info.get('amount', 0)
+                        if isinstance(amount_value, (int, float)):
+                            total_amount += amount_value
                     material_type = "ascension"
 
         # Failsafe for missing 'talents'
@@ -86,7 +91,7 @@ def find_characters_by_material(material_name: str) -> list:
 
         if total_amount > 0:
             characters_using_material.append({
-                "character": char_data['name'],
+                "character": char_data.get('name', 'Unknown Character'), # Added failsafe for character name
                 "material_type": material_type,
                 "amount": total_amount
             })

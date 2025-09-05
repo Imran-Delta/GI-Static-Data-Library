@@ -3,11 +3,13 @@ GI-Static-Data-Library
  * Added Albedo
  * Changed the gisl.py lookup system
 
-# -Update 0.0.3-
+# -Update 0.0.3 to 0.0.5-
   * Fixed a json error.
-
-# -Update 0.0.4-
   * Fixed multiple json errors. :<
+  * I FORGOT TO SAVE THE ERROR FIXES
+
+# -Update 0.0.6-
+	* Fixed an issue with retrieving character list by mats/element/weapon.
 
 *** Major disclaimer: I did use AI for this. I'm new, but I will slowly change the code using my knowledge as I continue adding more stuff to this library :3
 
