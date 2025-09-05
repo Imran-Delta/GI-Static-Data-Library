@@ -25,17 +25,17 @@ except Exception as e:
 def _get_ascension_material_amount(character_data: dict, material_name: str) -> int:
     """
     Helper function to calculate the total amount of an ascension material.
-    
+
     Args:
         character_data: The dictionary containing character's full data.
         material_name: The name of the ascension material to search for.
-        
+
     Returns:
         The total amount of the material needed for full ascension.
     """
     total_amount = 0
     ascension_levels = character_data.get('ascension_levels', {})
-    
+
     # Iterate through all materials listed in the ascension_levels table
     for mat_name, levels in ascension_levels.items():
         if mat_name.lower() == material_name.lower():
@@ -44,7 +44,7 @@ def _get_ascension_material_amount(character_data: dict, material_name: str) -> 
                 # Ensure the amount is an integer before adding
                 if isinstance(amount, (int, float)):
                     total_amount += int(amount)
-                    
+
     return total_amount
 
 def get_character_data(character_name: str, data_point: str = None) -> dict | list | None:
@@ -77,68 +77,59 @@ def find_characters_by_material(material_name: str) -> list:
         A list of dictionaries, where each dictionary contains the character's
         name, the type of material (ascension or talent), and the amount needed.
     """
-    characters_using_material = []
+    characters_using_material = {} # Use a dictionary to store unique characters
     for char_name, char_data in gisl_data.items():
-        total_amount = 0
-        material_type = ""
         
-        # Check ascension materials using the new helper function
+        # Check ascension materials first
         ascension_total = _get_ascension_material_amount(char_data, material_name)
         if ascension_total > 0:
-            characters_using_material.append({
+            characters_using_material[char_data['name']] = {
                 "character": char_data['name'],
                 "material_type": "ascension",
                 "amount": ascension_total
-            })
-            # Continue to the next character after finding an ascension match,
-            # as a material is either for ascension or talent, but not both at once.
-            # This avoids adding the same character twice.
-            continue
-            
+            }
+            continue # Move to the next character after finding an ascension match
+
         # Check talent materials (only if not found as an ascension material for this char)
+        total_amount = 0
         talents = char_data.get('talents', [])
-        if isinstance(talents, list): # Ensure talents is a list
+        if isinstance(talents, list):
             for talent in talents:
-                if isinstance(talent, dict): # Ensure talent is a dict
-                    level_mats = talent.get('level_materials', [])
-                    if isinstance(level_mats, dict): # Check if level_mats is a dict, not a list of dicts
-                        # Iterate through the level materials (e.g., "level_2-3", "level_4-6")
-                        for level_range_key, materials_in_level in level_mats.items():
-                            # materials_in_level is expected to be a list of material dicts
+                if isinstance(talent, dict):
+                    level_mats = talent.get('level_materials', {})
+                    if isinstance(level_mats, dict):
+                        for materials_in_level in level_mats.values():
                             if isinstance(materials_in_level, list):
                                 for mat in materials_in_level:
-                                    if isinstance(mat, dict): # Ensure mat is a dict
-                                        if mat.get('material', '').lower() == material_name.lower():
-                                            amount_value = mat.get('amount', 0)
-                                            
-                                            # Handle non-numeric amounts like "3-2"
-                                            if isinstance(amount_value, str):
-                                                try:
-                                                    # Try to parse ranges like "3-2" into the first number for simplicity
-                                                    # or sum them if they are separated by '+'
-                                                    if '-' in amount_value:
-                                                        amount_value = int(amount_value.split('-')[0])
-                                                    elif '+' in amount_value:
-                                                        amount_value = sum(int(n) for n in amount_value.split('+'))
-                                                    else:
-                                                        amount_value = int(amount_value)
-                                                except ValueError:
-                                                    amount_value = 0 # Default to 0 if parsing fails
-                                            elif not isinstance(amount_value, (int, float)):
-                                                amount_value = 0 # Default to 0 if not a number or string
+                                    if isinstance(mat, dict) and mat.get('material', '').lower() == material_name.lower():
+                                        amount_value = mat.get('amount', 0)
 
-                                            total_amount += amount_value
-                                            material_type = "talent"
-                    
-        # If any amount was found for talent materials, add it
-        if total_amount > 0 and material_type == "talent":
-            characters_using_material.append({
+                                        # Handle non-numeric amounts like "3-2"
+                                        if isinstance(amount_value, str):
+                                            try:
+                                                if '-' in amount_value:
+                                                    amount_value = int(amount_value.split('-')[0])
+                                                elif '+' in amount_value:
+                                                    amount_value = sum(int(n) for n in amount_value.split('+'))
+                                                else:
+                                                    amount_value = int(amount_value)
+                                            except ValueError:
+                                                amount_value = 0
+                                        elif not isinstance(amount_value, (int, float)):
+                                            amount_value = 0
+
+                                        total_amount += amount_value
+        
+        # If any amount was found for talent materials, add it to the dictionary
+        if total_amount > 0:
+            characters_using_material[char_data['name']] = {
                 "character": char_data['name'],
-                "material_type": material_type,
+                "material_type": "talent",
                 "amount": total_amount
-            })
+            }
 
-    return characters_using_material
+    # Convert the dictionary values to a list and return
+    return list(characters_using_material.values())
 
 def find_characters_by_element(element_name: str) -> list:
     """
