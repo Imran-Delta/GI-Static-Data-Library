@@ -22,6 +22,31 @@ except Exception as e:
     print(f"Error loading data: {e}")
     gisl_data = {}
 
+def _get_ascension_material_amount(character_data: dict, material_name: str) -> int:
+    """
+    Helper function to calculate the total amount of an ascension material.
+    
+    Args:
+        character_data: The dictionary containing character's full data.
+        material_name: The name of the ascension material to search for.
+        
+    Returns:
+        The total amount of the material needed for full ascension.
+    """
+    total_amount = 0
+    ascension_levels = character_data.get('ascension_levels', {})
+    
+    # Iterate through all materials listed in the ascension_levels table
+    for mat_name, levels in ascension_levels.items():
+        if mat_name.lower() == material_name.lower():
+            for level_data in levels.values():
+                amount = level_data.get('amount', 0)
+                # Ensure the amount is an integer before adding
+                if isinstance(amount, (int, float)):
+                    total_amount += int(amount)
+                    
+    return total_amount
+
 def get_character_data(character_name: str, data_point: str = None) -> dict | list | None:
     """
     Retrieves all or specific data for a Genshin Impact character from the JSON file.
@@ -57,30 +82,19 @@ def find_characters_by_material(material_name: str) -> list:
         total_amount = 0
         material_type = ""
         
-        # Check ascension materials
-        ascension_mats_dict = char_data.get('ascension_materials')
-        if isinstance(ascension_mats_dict, dict): # Ensure it's a dictionary
-            # Iterate through the categories (gems, boss_mat, etc.)
-            for category, material_info in ascension_mats_dict.items():
-                # Ensure the material_info is a dictionary before accessing its 'name'
-                if isinstance(material_info, dict):
-                    if material_info.get('name', '').lower() == material_name.lower():
-                        # Note: Ascension materials don't have a specific 'amount' in the provided structure.
-                        # We'll use a placeholder of 1 for simplicity if found.
-                        total_amount = 1 
-                        material_type = "ascension"
-                        # If you find it as an ascension material, we can break from this inner loop
-                        # to avoid double-counting if it's also a talent material.
-                        break 
-            # If we found it as an ascension material, add it and continue to the next character
-            if total_amount > 0 and material_type == "ascension":
-                characters_using_material.append({
-                    "character": char_data['name'],
-                    "material_type": material_type,
-                    "amount": total_amount
-                })
-                continue # Move to the next character to avoid talent material checks for this one
-
+        # Check ascension materials using the new helper function
+        ascension_total = _get_ascension_material_amount(char_data, material_name)
+        if ascension_total > 0:
+            characters_using_material.append({
+                "character": char_data['name'],
+                "material_type": "ascension",
+                "amount": ascension_total
+            })
+            # Continue to the next character after finding an ascension match,
+            # as a material is either for ascension or talent, but not both at once.
+            # This avoids adding the same character twice.
+            continue
+            
         # Check talent materials (only if not found as an ascension material for this char)
         talents = char_data.get('talents', [])
         if isinstance(talents, list): # Ensure talents is a list
@@ -94,7 +108,7 @@ def find_characters_by_material(material_name: str) -> list:
                             if isinstance(materials_in_level, list):
                                 for mat in materials_in_level:
                                     if isinstance(mat, dict): # Ensure mat is a dict
-                                        if mat.get('name', '').lower() == material_name.lower():
+                                        if mat.get('material', '').lower() == material_name.lower():
                                             amount_value = mat.get('amount', 0)
                                             
                                             # Handle non-numeric amounts like "3-2"

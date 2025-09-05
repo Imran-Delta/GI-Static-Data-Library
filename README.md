@@ -1,4 +1,7 @@
 GI-Static-Data-Library
+# -Update 0.0.8-
+	* Trying a new json retreval system using lib
+
 # -Update 0.0.7-
 	* Trying to fix the same error that I tried to fix on 0.0.6.
 
