@@ -246,13 +246,47 @@
                 "type": "Normal Attack",
                 "description": "Normal Attack\nPerforms up to 5 rapid strikes.\n\nCharged Attack\nConsumes a certain amount of Stamina to unleash 2 rapid sword strikes.\n\nPlunging Attack\nPlunges from mid-air to strike the ground below, damaging opponents along the path and dealing AoE DMG upon impact.",
                 "level_materials": {
-                    "level_2-3": [
-                        { "material": "Teachings of Ballad", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad" },
-                        { "material": "Divining Scroll", "amount": "6-3", "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll" }
-                    ],
-                    "level_4-6": [
-                        { "material": "Guide to Ballad", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Guide_to_Ballad" },
-                        { "material": "Sealed Scroll", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll" }
+                    "level_1": [
+                        {
+                            "material": "Teachings of Ballad",
+                            "amount": "3",
+                            "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad"
+                        },
+                        {
+                            "material": "Divining Scroll",
+                            "amount": "3",
+                            "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll"
+                        },
+						{
+							"material": "Sealed Scroll",
+							"amount": "0-3-4-6-9",
+							"link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll"
+						},
+						{
+							"material": "Guide to Ballad",
+							"amount": "0-2-4-6-9",
+							"link": "https://genshin-impact.fandom.com/wiki/Guide_to_Ballad"
+						},
+						{
+							"material": "Forbidden Curse Scroll",
+							"amount": "0-0-0-0-0-4-6-9-12",
+							"link": "https://genshin-impact.fandom.com/wiki/Forbidden_Curse_Scroll"
+						},
+						{
+							"material": "Philosophies of Ballad",
+							"amount": "0-0-0-0-0-4-6-12-16",
+							"link": "https://genshin-impact.fandom.com/wiki/Philosophies_of_Ballad"
+						},
+						{
+							"material": "Tusk of Monoceros Caeli",
+							"amount": "1-1-2-2",
+							"link": "https://genshin-impact.fandom.com/wiki/Tusk_of_Monoceros_Caeli"
+						},
+						{
+							"material": "Crown of Insight",
+							"amount": "1",
+							"link": "https://genshin-impact.fandom.com/wiki/Crown_of_Insight"
+						}
                     ]
                 }
             },
@@ -262,12 +296,28 @@
                 "description": "Albedo creates a Solar Isotoma using alchemy, which deals AoE Geo DMG on appearance.\n\nSolar Isotoma\nhas the following properties:\nWhen opponents within the Solar Isotoma field take DMG, the Solar Isotoma will generate Transient Blossoms which deal AoE Geo DMG. DMG dealt scales off Albedo's DEF.\nTransient Blossoms can only be generated once every 2s.\nWhen a character is located at the locus of the Solar Isotoma, the Solar Isotoma will accumulate Geo power to form a crystallized platform that lifts the character up to a certain height. Only one crystallized platform can exist at a time.\nSolar Isotoma is considered a Geo construct. Only one Solar Isotoma created by Albedo himself can exist at a time.",
                 "level_materials": {
                     "level_2-3": [
-                        { "material": "Teachings of Ballad", "amount": "3-2", "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad" },
-                        { "material": "Divining Scroll", "amount": "6-3", "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll" }
+                        {
+                            "material": "Teachings of Ballad",
+                            "amount": "3-2",
+                            "link": "https://genshin-impact.fandom.com/wiki/Teachings_of_Ballad"
+                        },
+                        {
+                            "material": "Divining Scroll",
+                            "amount": "6-3",
+                            "link": "https://genshin-impact.fandom.com/wiki/Divining_Scroll"
+                        }
                     ],
                     "level_4-6": [
-                        { "material": "Guide to Ballad", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Guide_to_Ballad" },
-                        { "material": "Sealed Scroll", "amount": "4-6-9", "link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll" }
+                        {
+                            "material": "Guide to Ballad",
+                            "amount": "4-6-9",
+                            "link": "https://genshin-impact.fandom.com/wiki/Guide_to_Ballad"
+                        },
+                        {
+                            "material": "Sealed Scroll",
+                            "amount": "4-6-9",
+                            "link": "https://genshin-impact.fandom.com/wiki/Sealed_Scroll"
+                        }
                     ]
                 }
             },
@@ -277,24 +327,24 @@
                 "description": "Under Albedo's command, Geo crystals surge and burst forth, dealing AoE Geo DMG in front of him.\nIf a Solar Isotoma created by Albedo himself is on the field, 7 Fatal Blossoms will be generated in the Solar Isotoma field, bursting violently into bloom and dealing AoE Geo DMG.\n\nTectonic Tide DMG and Fatal Blossom DMG will not generate Transient Blossoms.",
                 "level_materials": {}
             },
-			{
-				"name": "Calcite Might",
-				"type": "1st Ascension Passive",
-				"description": "Transient Blossoms generated by Abiogenesis: Solar Isotoma deal 25% more DMG to opponents whose HP is below 50%.",
-				"level_materials": "A1"
-			},
-			{
-				"name": "Homuncular Nature",
-				"type": "4th Ascension Passive",
-				"description": "Using Rite of Progeniture: Tectonic Tide increases the Elemental Mastery of nearby party members by 125 for 10s.",
-				"level_materials": "A4"
-			},
-			{
-				"name": "Flash of Genius",
-				"type": "Utility Passive",
-				"description": "When Albedo crafts Weapon Ascension Materials, he has a 10% chance to receive double the product.",
-				"level_materials": "Utiliy (Auto-unlocked)"
-			}
+            {
+                "name": "Calcite Might",
+                "type": "1st Ascension Passive",
+                "description": "Transient Blossoms generated by Abiogenesis: Solar Isotoma deal 25% more DMG to opponents whose HP is below 50%.",
+                "level_materials": "A1"
+            },
+            {
+                "name": "Homuncular Nature",
+                "type": "4th Ascension Passive",
+                "description": "Using Rite of Progeniture: Tectonic Tide increases the Elemental Mastery of nearby party members by 125 for 10s.",
+                "level_materials": "A4"
+            },
+            {
+                "name": "Flash of Genius",
+                "type": "Utility Passive",
+                "description": "When Albedo crafts Weapon Ascension Materials, he has a 10% chance to receive double the product.",
+                "level_materials": "Utiliy (Auto-unlocked)"
+            }
         ],
         "constellations": [
             {

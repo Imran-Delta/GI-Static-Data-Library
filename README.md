@@ -1,4 +1,8 @@
 GI-Static-Data-Library
+# -Update 0.1.0-
+	* Trying to fix the talent retrieve function.
+
+
 # -Update 0.0.9-
 	* Fixing the lib issues
 
