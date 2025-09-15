@@ -20,99 +20,82 @@ try:
     json_data = pkg_resources.files(PACKAGE_NAME).joinpath(DATA_FILE_NAME).read_text(encoding='utf-8')
     gisl_data = json.loads(json_data)
     logger.info("Successfully loaded gisl_data.json")
+    print("GISL_DATA_LIBRARY: Data loaded successfully.")
 except Exception as e:
     # This block is a failsafe. If the data file cannot be found,
     # the 'gisl_data' dictionary will be initialized as empty,
     # preventing the script from crashing.
     logger.error(f"Error loading data: {e}")
+    print(f"GISL_DATA_LIBRARY: Error loading data from {DATA_FILE_NAME}: {e}")
     gisl_data = {}
 
-# --- New function to get character data ---
-def get_character_data(character_name: str) -> dict:
+def get_character_data(character_key: str) -> dict or None:
     """
-    Finds and returns the full data dictionary for a given character.
+    Retrieves the full data for a specific character by their key.
 
     Args:
-        character_name: The name of the character to search for.
+        character_key: The lowercase key of the character (e.g., 'albedo').
 
     Returns:
-        The dictionary containing the character's full data, or an empty dictionary if not found.
+        A dictionary of the character's data, or None if not found.
     """
-    logger.info(f"Attempting to retrieve data for character: {character_name}")
-    data = gisl_data.get(character_name.lower(), {})
-    if not data:
-        logger.warning(f"No data found for character: {character_name}")
-    else:
-        logger.info(f"Data found for character: {character_name}")
-    return data
+    return gisl_data.get(character_key.lower())
 
-# Helper function to calculate the total amount of an ascension material.
-def _get_ascension_material_amount(character_data: dict, material_name: str) -> int:
+def get_all_characters_data() -> dict:
     """
-    Helper function to calculate the total amount of an ascension material.
-
-    Args:
-        character_data: The dictionary containing character's full data.
-        material_name: The name of the ascension material to search for.
+    Returns the full dictionary of all character data.
 
     Returns:
-        The total amount of the material, or 0 if not found.
+        A dictionary containing all character data.
     """
-    total_amount = 0
-    if 'ascension_materials' in character_data:
-        for mat_type, mat_data in character_data['ascension_materials'].items():
-            if 'name' in mat_data and mat_data['name'] == material_name:
-                total_amount += mat_data.get('amount', 0)
-    return total_amount
+    return gisl_data
 
 def find_characters_by_material(material_name: str) -> list:
     """
-    Finds and returns a list of characters that use the given material.
+    Finds and returns a list of characters that use a given ascension or talent material.
 
     Args:
-        material_name: The name of the material to search for (e.g., 'Cecilia').
+        material_name: The name of the material to search for (e.g., "Prithiva Topaz", "Crown of Insight").
 
     Returns:
-        A list of dictionaries, where each dictionary contains the character's name,
-        material type, and the total amount of that material needed.
+        A list of dictionaries, each containing character name, material type, and total amount.
     """
-    material_name_lower = material_name.lower()
+    material_name = material_name.lower()
     characters_using_material = {}
-    
-    # Search through all characters for ascension materials
-    for char_name, char_data in gisl_data.items():
-        if 'ascension_materials' in char_data:
-            for mat_type, mat_data in char_data['ascension_materials'].items():
-                if mat_data.get('name', '').lower() == material_name_lower:
-                    # Logic for getting amount from ascension_levels or elsewhere
-                    total_amount = _get_ascension_material_amount(char_data, mat_data['name'])
+
+    for char_key, char_data in gisl_data.items():
+        # Check for ascension materials
+        ascension_mats = char_data.get('ascension_materials', {})
+        for mat_type, mat_info in ascension_mats.items():
+            if mat_info and mat_info.get('name', '').lower() == material_name:
+                total_amount = 0
+                for level_info in char_data.get('ascension_levels', {}).values():
+                    # Sum the amounts for the matching material
+                    if mat_info['name'] in level_info:
+                        total_amount += level_info[mat_info['name']]['amount']
+
+                if char_data['name'] not in characters_using_material:
                     characters_using_material[char_data['name']] = {
                         "character": char_data['name'],
                         "material_type": "ascension",
                         "amount": total_amount
                     }
-    
-    # Search through all characters for talent materials
-    for char_name, char_data in gisl_data.items():
-        if 'talent_materials' in char_data:
+                else:
+                    # Update the amount if the character is already found
+                    characters_using_material[char_data['name']]['amount'] += total_amount
+
+        # Check for talent materials
+        talents = char_data.get('talents', [])
+        for talent in talents:
+            talent_mats = talent.get('level_materials', {}).get('level', [])
             total_amount = 0
-            for talent_type, talent_data in char_data['talent_materials'].items():
-                if 'level_materials' in talent_data:
-                    for level, level_mats in talent_data['level_materials'].items():
-                        for mat_list_name in ['talent_books', 'common_materials', 'boss_drops']:
-                            for mat in level_mats.get(mat_list_name, []):
-                                if mat.get('name', '').lower() == material_name_lower:
-                                    total_amount += mat.get('amount', 0)
-                        
-                        mora = level_mats.get('mora')
-                        if mora is not None and material_name_lower == 'mora':
-                            total_amount += mora
-                            
-                        crown = level_mats.get('crown_of_insight', 0)
-                        if crown > 0 and material_name_lower == 'crown of insight':
-                             total_amount += crown
+            for mat_info in talent_mats:
+                if mat_info.get('material', '').lower() == material_name:
+                    amounts_str = mat_info.get('amount', '')
+                    amounts = [int(a) for a in amounts_str.split('-') if a.isdigit()]
+                    total_amount += sum(amounts)
             
-            if total_amount > 0 and char_data['name'] not in characters_using_material:
+            if total_amount > 0:
                 characters_using_material[char_data['name']] = {
                     "character": char_data['name'],
                     "material_type": "talent",

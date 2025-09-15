@@ -1,6 +1,7 @@
 GI-Static-Data-Library
-# -Update 0.1.0-
+# -Update 0.1.0 to 0.1.5-
 	* Trying to fix the talent retrieve function.
+	* Added a print system temporarily to help me debug
 
 
 # -Update 0.0.9-
