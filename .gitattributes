@@ -1,0 +1,15 @@
+# 1. Ensure all text files use LF (Linux style) on check-in
+# This prevents the "LF will be replaced by CRLF" warnings you saw earlier
+* text=auto eol=lf
+
+# 2. Force JSON files (your character data) to always use LF
+# This is vital since you are moving to single JSON files per character
+*.json text eol=lf
+
+# 3. Keep Python files consistent between Windows and Manjaro
+*.py text eol=lf
+*.pyw text eol=lf
+
+# 4. Treat images/binaries as-is (don't touch them)
+*.png binary
+*.jpg binary
