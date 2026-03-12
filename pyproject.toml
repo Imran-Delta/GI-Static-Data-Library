@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "genshin-impact"
+dynamic = ["version"]
+description = "A static library of Genshin item/char info. (WIP)"
+readme = "README.md"
+authors = [
+  {name = "Imran Bin Gifary (System Delta or Imran Delta Online)", email = "imran.sdelta@gmail.com"}
+]
+license = "BSD-3-Clause"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD 3 Clause",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+dependencies = [
+  "packaging",
+  "requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/Imran-Delta/GI-Static-Data-Library"
+
+[tool.setuptools]
+packages = ["genshin_impact", "genshin_impact.character_data"]
+# These are standalone files in the root directory
+py-modules = ["LibTest"]
+
+[tool.setuptools.dynamic]
+version = {attr = "genshin_impact.__version__"}
+
+[tool.setuptools.package-data]
+# This ensures the JSON files inside character_data are bundled
+genshin_impact = ["character_data/*.json", "editor.pyw"]
+
+[tool.setuptools.exclude-package-data]
+genshin_impact = ["*.db"]
+
