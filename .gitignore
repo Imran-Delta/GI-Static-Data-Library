@@ -1,0 +1,41 @@
+# --- Python Junk ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- GISL Specifics ---
+# We keep the JSONs, but block the auto-generated database
+*.db
+*.sqlite3
+
+# Block your local backup files
+*.bak
+*.tmp
+
+# --- Environment & OS ---
+.env
+.venv
+env/
+venv/
+ENV/
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini

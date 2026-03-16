@@ -22,8 +22,8 @@
             "link": "https://genshin-impact.fandom.com/wiki/Precision_Kuuvahki_Stamping_Die"
         },
         "local_specialty": {
-            "name": "Portable Bearing",
-            "link": "https://genshin-impact.fandom.com/wiki/Portable_Bearing"
+            "name": "Portable BearingA",
+            "link": "https://genshin-impact.fandom.com/wiki/Portable_BearingA"
         },
         "common_mat": {
             "name": "Broken Drive Shaft",
@@ -132,36 +132,36 @@
                 "link": "https://genshin-impact.fandom.com/wiki/Reinforced_Drive_Shaft"
             }
         },
-        "Portable Bearing": {
+        "Portable BearingA": {
             "A1": {
                 "level_range": "20 -> 40",
                 "amount": 3,
-                "link": "https://genshin-impact.fandom.com/wiki/Portable_Bearing"
+                "link": "https://genshin-impact.fandom.com/wiki/Portable_BearingA"
             },
             "A2": {
                 "level_range": "40 -> 50",
                 "amount": 10,
-                "link": "https://genshin-impact.fandom.com/wiki/Portable_Bearing"
+                "link": "https://genshin-impact.fandom.com/wiki/Portable_BearingA"
             },
             "A3": {
                 "level_range": "50 -> 60",
                 "amount": 20,
-                "link": "https://genshin-impact.fandom.com/wiki/Portable_Bearing"
+                "link": "https://genshin-impact.fandom.com/wiki/Portable_BearingA"
             },
             "A4": {
                 "level_range": "60 -> 70",
                 "amount": 30,
-                "link": "https://genshin-impact.fandom.com/wiki/Portable_Bearing"
+                "link": "https://genshin-impact.fandom.com/wiki/Portable_BearingA"
             },
             "A5": {
                 "level_range": "70 -> 80",
                 "amount": 45,
-                "link": "https://genshin-impact.fandom.com/wiki/Portable_Bearing"
+                "link": "https://genshin-impact.fandom.com/wiki/Portable_BearingA"
             },
             "A6": {
                 "level_range": "80 -> 90",
                 "amount": 60,
-                "link": "https://genshin-impact.fandom.com/wiki/Portable_Bearing"
+                "link": "https://genshin-impact.fandom.com/wiki/Portable_BearingA"
             }
         }
     },

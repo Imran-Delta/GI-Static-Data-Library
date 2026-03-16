@@ -313,13 +313,6 @@
             "description": "Displays the location of nearby resources unique to Nod-Krai on the mini-map.\nAdditionally, Aino appears to be able to alter the Cool Your Jets Ducky's appearance in some way...",
             "level_materials": "Utiliy (Auto-unlocked)",
             "link": "https://genshin-impact.fandom.com/wiki/Miniaturized_Detection_Sensor"
-        },
-        {
-            "name": "Force Limit Analysis",
-            "type": "Moonsign Benediction Passive",
-            "description": "When Aino is in the party, the party's Moonsign will increase by 1 level.",
-            "level_materials": "Moonsign (Auto-unlocked, Nod-Krai Mechanic)",
-            "link": "https://genshin-impact.fandom.com/wiki/Force_Limit_Analysis"
         }
     ],
     "constellations": [
