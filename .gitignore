@@ -19,6 +19,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+venv/
 
 # --- GISL Specifics ---
 # We keep the JSONs, but block the auto-generated database
