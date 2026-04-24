@@ -40,3 +40,4 @@ ENV/
 .idea/
 Thumbs.db
 Desktop.ini
+.trash*

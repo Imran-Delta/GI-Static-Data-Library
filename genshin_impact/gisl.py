@@ -758,14 +758,13 @@ def check_for_updates() -> dict:
 # ----------------------------------------------------------------------
 
 def _parse_amount(amount_str: str) -> int:
-    """Convert a material amount string (e.g., '3-6') to a total integer."""
     if not amount_str:
         return 0
     parts = amount_str.split('-')
     if len(parts) == 2:
         try:
             low, high = int(parts[0]), int(parts[1])
-            return low + high  # or average? For total, sum is used in legacy
+            return low + high
         except:
             pass
     try:

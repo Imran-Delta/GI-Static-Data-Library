@@ -6,6 +6,7 @@ import os
 import tempfile
 import shutil
 from tkhtmlview import HTMLLabel
+import copy
 
 class GenshinInfoEditor:
     def __init__(self, root):
@@ -39,6 +40,7 @@ class GenshinInfoEditor:
         self.mat_entries = {}       # For Ascension Materials
         self.stat_widgets = {}      # For Stats Table
         self.current_stat_keys = []
+        self.talent_material_widgets = {}
         self.ascension_visible = True
 
         self.setup_ui()
@@ -254,41 +256,109 @@ class GenshinInfoEditor:
             desc_ent.insert("1.0", item.get("description", ""))
             desc_ent.pack(fill=tk.X)
             self.entries[key_name].append({"name_w": name_ent, "desc_w": desc_ent, "raw": item})
+            if key_name == "talents" and item.get("type") == "Normal Attack":
+                self.build_talent_materials_editor(box, i, item.get("level_materials", {}))
+
+    def build_talent_materials_editor(self, parent_frame, talent_index, level_materials):
+        materials_frame = tk.LabelFrame(
+            parent_frame, text="Upgrade Materials (editable names)",
+            bg=self.colors["bg"], fg=self.colors["accent"]
+        )
+        materials_frame.pack(fill=tk.X, pady=5)
+
+        level_list = level_materials.get("level", [])
+        if not level_list:
+            tk.Label(materials_frame, text="No material data", bg=self.colors["bg"], fg="gray").pack()
+            return
+
+        # Map each unique material name to the indices it appears in (skip Crown)
+        name_to_indices = {}
+        for idx, entry in enumerate(level_list):
+            mat_name = entry.get("material", "")
+            if mat_name == "Crown of Insight":
+                continue
+            if mat_name not in name_to_indices:
+                name_to_indices[mat_name] = []
+            name_to_indices[mat_name].append(idx)
+
+        self.talent_material_widgets[talent_index] = {}
+
+        for mat_name, indices in name_to_indices.items():
+            row = tk.Frame(materials_frame, bg=self.colors["bg"])
+            row.pack(fill=tk.X, pady=2)
+
+            entry = tk.Entry(row, bg=self.colors["input_bg"], fg=self.colors["text"], borderwidth=0)
+            entry.insert(0, mat_name)
+            entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=2)
+
+            self.talent_material_widgets[talent_index][mat_name] = (entry, indices)
 
     def new_character(self):
-        """Open a dialog to create a new character file."""
+        """Create a new character file by combining the structure of two characters and the data of a third."""
         dialog = tk.Toplevel(self.root)
         dialog.title("New Character")
-        dialog.geometry("400x250")
+        dialog.geometry("550x450")
         dialog.configure(bg=self.colors["bg"])
         dialog.transient(self.root)
         dialog.grab_set()
 
-        # Key entry
+        # --- Character key entry ---
         tk.Label(dialog, text="Character Key (filename, e.g., 'hu_tao'):",
-                 bg=self.colors["bg"], fg=self.colors["text"]).pack(pady=(15,0))
+                bg=self.colors["bg"], fg=self.colors["text"]).pack(pady=(15,0))
         key_var = tk.StringVar()
         key_entry = tk.Entry(dialog, textvariable=key_var, bg=self.colors["input_bg"],
-                             fg="white", borderwidth=0, insertbackground="white")
+                            fg="white", borderwidth=0, insertbackground="white")
         key_entry.pack(pady=5, padx=20, fill=tk.X)
         key_entry.focus_set()
 
-        # Special stat entry
+        # --- Special stat entry ---
         tk.Label(dialog, text="Special Ascension Stat (e.g., 'Elemental Mastery'):",
-                 bg=self.colors["bg"], fg=self.colors["text"]).pack(pady=(10,0))
+                bg=self.colors["bg"], fg=self.colors["text"]).pack(pady=(10,0))
         stat_var = tk.StringVar(value="Elemental Mastery")
         stat_entry = tk.Entry(dialog, textvariable=stat_var, bg=self.colors["input_bg"],
-                              fg="white", borderwidth=0, insertbackground="white")
+                            fg="white", borderwidth=0, insertbackground="white")
         stat_entry.pack(pady=5, padx=20, fill=tk.X)
+
+        # --- Selection for structure (two characters) and data (one character) ---
+        tk.Label(dialog, text="Select two characters for structure (top-level keys):",
+                bg=self.colors["bg"], fg=self.colors["text"]).pack(pady=(15,0))
+        frame1 = tk.Frame(dialog, bg=self.colors["bg"])
+        frame1.pack(pady=5, fill=tk.X, padx=20)
+
+        char_keys = sorted(self.data.keys())
+        struct1_var = tk.StringVar()
+        struct2_var = tk.StringVar()
+        struct1_cb = ttk.Combobox(frame1, values=char_keys, textvariable=struct1_var, state="readonly")
+        struct2_cb = ttk.Combobox(frame1, values=char_keys, textvariable=struct2_var, state="readonly")
+        struct1_cb.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0,5))
+        struct2_cb.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5,0))
+
+        tk.Label(dialog, text="Select a character for data (values to copy):",
+                bg=self.colors["bg"], fg=self.colors["text"]).pack(pady=(15,0))
+        data_var = tk.StringVar()
+        data_cb = ttk.Combobox(dialog, values=char_keys, textvariable=data_var, state="readonly")
+        data_cb.pack(pady=5, padx=20, fill=tk.X)
 
         def do_create():
             key = key_var.get().strip().lower()
             spec_stat = stat_var.get().strip()
+            struct1 = struct1_var.get()
+            struct2 = struct2_var.get()
+            data_src = data_var.get()
 
             if not key:
                 messagebox.showerror("Error", "Character key cannot be empty.")
                 return
-            
+            if not spec_stat:
+                messagebox.showerror("Error", "Special stat cannot be empty.")
+                return
+            if not struct1 or not struct2:
+                messagebox.showerror("Error", "Please select two characters for structure.")
+                return
+            if not data_src:
+                messagebox.showerror("Error", "Please select a character for data.")
+                return
+
             # Sanitize key
             sanitized = re.sub(r'[^a-z0-9_]', '', key.replace(' ', '_'))
             if sanitized != key:
@@ -296,70 +366,87 @@ class GenshinInfoEditor:
                     return
                 key = sanitized
 
-            if not spec_stat:
-                messagebox.showerror("Error", "Special stat cannot be empty.")
-                return
-
             file_path = os.path.join(self.data_dir, f"{key}.json")
             if os.path.exists(file_path):
                 if not messagebox.askyesno("Overwrite?", f"'{key}.json' already exists. Overwrite?"):
                     return
 
-            # Create template using dummy data for apply_template
-            dummy = {"ascension_stat": spec_stat}
-            new_data = self.apply_template(dummy)
+            # Load the three characters
+            char_struct1 = self.data.get(struct1)
+            char_struct2 = self.data.get(struct2)
+            char_data = self.data.get(data_src)
+            if not char_struct1 or not char_struct2 or not char_data:
+                messagebox.showerror("Error", "One of the selected characters does not exist.")
+                return
 
+            # 1. Compute intersection of top-level keys
+            common_keys = set(char_struct1.keys()) & set(char_struct2.keys())
+
+            # 2. Deep copy the data source and keep only common keys
+            new_data = copy.deepcopy(char_data)
+            # Remove any top-level keys not in the intersection
+            for k in list(new_data.keys()):
+                if k not in common_keys:
+                    del new_data[k]
+
+            # 3. Override ascension_stat with user's choice
+            new_data["ascension_stat"] = spec_stat
+            # Ensure the name is empty (or keep the data source's name? Probably empty)
+            new_data["name"] = ""
+
+            # 4. Save
             try:
                 self.save_single_character_safely(file_path, new_data)
                 self.data[key] = new_data
                 self.update_character_list()
                 self.char_selector.set(key)
                 self.load_character()
-                messagebox.showinfo("Success", f"Created '{key}.json'")
+                messagebox.showinfo("Success", f"Created '{key}.json' using structure from {struct1} and {struct2},\n"
+                                            f"and data from {data_src}.")
                 dialog.destroy()
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to save: {e}")
 
         tk.Button(dialog, text="Create", bg="#2d5a27", fg="white",
-                  relief="flat", command=do_create).pack(pady=20)
+                relief="flat", command=do_create).pack(pady=20)
     
     # ----------------------------------------------------------------------
     # Template for new characters
     # ----------------------------------------------------------------------
-        def apply_template(self, char_data):
-            """
-            Generate a complete character template, including ascension_levels.
-            char_data should contain at least 'ascension_stat' (e.g., from the dialog).
-            """
-            spec_stat = char_data.get("ascension_stat", "Special Stat").strip()
-            if not spec_stat:
-                spec_stat = "Special Stat"
+    def apply_template(self, char_data):
+        """
+        Generate a complete character template, including ascension_levels.
+        char_data should contain at least 'ascension_stat' (e.g., from the dialog).
+        """
+        spec_stat = char_data.get("ascension_stat", "Special Stat").strip()
+        if not spec_stat:
+            spec_stat = "Special Stat"
 
-            # Default material base names (user will edit later)
-            gem_base = "Gem"
-            boss_mat = "Boss Material"
-            local_spec = "Local Specialty"
-            common_t1 = "Common T1"
-            common_t2 = "Common T2"
-            common_t3 = "Common T3"
+        # Default material base names (user will edit later)
+        gem_base = "Gem"
+        boss_mat = "Boss Material"
+        local_spec = "Local Specialty"
+        common_t1 = "Common T1"
+        common_t2 = "Common T2"
+        common_t3 = "Common T3"
 
-            # ------------------------------------------------------------------
-            # Build ascension_levels
-            # ------------------------------------------------------------------
-            ascension_levels = {}
+        # ------------------------------------------------------------------
+        # Build ascension_levels
+        # ------------------------------------------------------------------
+        ascension_levels = {}
 
-            def add_material(key, phases):
-                """Add a material with its phase entries."""
-                material_dict = {}
-                for phase, lvl_range in phases:
-                    material_dict[phase] = {
-                        "level_range": lvl_range,
-                        "amount": 0,          # placeholder – edit later
-                        "link": ""             # will be generated on save
-                    }
-                ascension_levels[key] = material_dict
+        def add_material(key, phases):
+            """Add a material with its phase entries."""
+            material_dict = {}
+            for phase, lvl_range in phases:
+                material_dict[phase] = {
+                    "level_range": lvl_range,
+                    "amount": 0,          # placeholder – edit later
+                    "link": ""             # will be generated on save
+                }
+            ascension_levels[key] = material_dict
 
-            # Gem tiers
+        # Gem tiers
         add_material(f"{gem_base} Sliver", [("A1", "20 -> 40")])
         add_material(f"{gem_base} Fragment", [("A2", "40 -> 50"), ("A3", "50 -> 60")])
         add_material(f"{gem_base} Chunk", [("A4", "60 -> 70"), ("A5", "70 -> 80")])
@@ -596,14 +683,31 @@ class GenshinInfoEditor:
             for l_key in ["talents", "constellations"]:
                 if l_key in self.entries:
                     new_list = []
-                    for e in self.entries[l_key]:
+                    for idx, e in enumerate(self.entries[l_key]):
                         item_data = e["raw"].copy()
                         t_name = e["name_w"].get().strip()
                         item_data["name"] = t_name
                         item_data["description"] = e["desc_w"].get("1.0", tk.END).strip()
                         item_data["link"] = self.generate_fandom_link(t_name)
+
+                        # --- Apply material name changes if this talent has an editor ---
+                        if l_key == "talents" and idx in self.talent_material_widgets:
+                            level_mats = item_data.get("level_materials", {})
+                            level_list = level_mats.get("level", [])
+                            for old_name, (entry, indices) in self.talent_material_widgets[idx].items():
+                                new_name = entry.get().strip()
+                                if new_name and new_name != old_name:
+                                    for i in indices:
+                                        if i < len(level_list):
+                                            level_list[i]["material"] = new_name
+                                            level_list[i]["link"] = self.generate_fandom_link(new_name)
+                        # ----------------------------------------------------------------
+
                         new_list.append(item_data)
                     updated[l_key] = new_list
+
+# --- REMOVED: copying of NA mats to Skill and Burst ---
+# (No copying occurs – Skill and Burst remain as they were, empty)
 
             self.data[self.current_char_key] = updated
             
@@ -700,6 +804,7 @@ class GenshinInfoEditor:
         key = self.char_selector.get()
         self.current_char_key = key
         char_data = self.data.get(key, {})
+        self.talent_material_widgets = {}
 
         # Build rich HTML preview
         titles = char_data.get('additional_titles', [])
