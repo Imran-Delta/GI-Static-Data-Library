@@ -10,7 +10,7 @@ This is my personal project of making a library containing information on items,
 # Current Details:
 `REQUIRED DEPENDENCY (Installing GISDL also installs the dependencies): Packaging and Requests`
 
-Also- currently adding a sql backend for performance future proofing, old methods shall not break- (I hope T_T)
+Also- SQL backend added for performance future-proofing. `get_talent_materials`, `get_ascension_data`, `get_ascension_levels`, `get_ascension_stats`, `get_passive_talents`, `get_constellations`, and `get_character_summary` now all take a `use_sql` parameter (default `True`) so they fetch via a single-row SQL query instead of loading every character into memory - old calls that don't pass it are unaffected signature-wise, they just get the faster path automatically. Pass `use_sql=False` to force the old monolithic-dict behavior.
 MOONSIGN ADDED!
 
 Characters Added:
@@ -148,10 +148,11 @@ async def setup(bot):
 
 This table describes the three methods.
 
-Requested Detail Method to Use Data Structure Display Logic
-Ascension Materials `get_ascension_data(name, opt)`` Formatted String or List Focuses on items like Gems, Boss Mats, and Specialties for A1-A6.
-Ascension Stats `get_ascension_stats(name)`` Formatted String Displays HP, ATK, and DEF growth from A0 up to A6-C8 (Level 100).
-Full Progression `get_ascension_levels(name, opt)`` Formatted String Combines materials and stats; automatically labels Level 100 as "Stat Increase Only".
+| Requested Detail | Method to Use | Data Structure | Display Logic |
+|---|---|---|---|
+| Ascension Materials | `get_ascension_data(name, opt)` | Formatted String or List | Focuses on items like Gems, Boss Mats, and Specialties for A1-A6. |
+| Ascension Stats | `get_ascension_stats(name)` | Formatted String | Displays HP, ATK, and DEF growth from A0 up to A6-C8 (Level 100). |
+| Full Progression | `get_ascension_levels(name, opt)` | Formatted String | Combines materials and stats; automatically labels Level 100 as "Stat Increase Only". |
 
 By providing these three distinct entry points, users can choose between a concise farming list, a theory-crafting stat sheet, or a full overview of character investment.
 
@@ -363,32 +364,84 @@ The dictionary returned by `get_character_data(name)` is highly structured. To d
 | Requested Detail | Access Key | Data Structure | Display Logic |
 |---|---|---|---|
 | Main Talents | `data['talents']` | `list[dict]` | Iterate to display name/desc of the three active combat talents. |
-| Passive Talents | `data['talents']` | `list[dict]` | [NEW] Filter by type (e.g., 'Passive' or 'Utility') to separate them from active skills. |
+| Passive Talents | `data['talents']` | `list[dict]` | [NEW] Every talent's `type` is one of exactly 3 active-combat values ("Normal Attack", "Elemental Skill", "Elemental Burst") or a passive value that varies per character ("1st Ascension Passive", "Utility Passive", "Moonsign Benediction Passive", etc. - the exact wording is not fixed). Filter passives by **excluding** the 3 known active types, not by matching a list of passive-type strings - a fixed inclusion list won't cover new passive categories future characters add. `get_passive_talents()` does this for you. |
 | Constellations | `data['constellations']` | `list[dict]` | Iterate (indices 0-5) to display info for C1 through C6. |
 | Ascension Levels | `data['ascension_levels']` | `dict` | Iterate over `.items()` to show level milestones and stat changes. |
 | Full Summary | Multiple | mixed | [NEW] Combine top-level keys like element, weapon_type, rarity, and region. |
-### 3.3 🧩 Talent Material Retrieval: Handling Positional Data (Legacy)
-The material amount string is a compressed, positionally indexed list (e.g., "0-0-0-0-0-4-6-9-12"). Because the data is "Legacy" format, zeros are used as crucial placeholders to keep the alignment consistent across different material types.
-* A. Understanding the Positional Indexing
-The code parses the raw string into an amounts list. The index of an item in this list maps directly to a specific level-up step:
-1. Index 0: Level 1 --> 2; materials_by_level[1]
-2. Index 5: Level 6 --> 7; materials_by_level[6]
-3. Index 8: Level 9 --> 10; materials_by_level[9]
-* B. The Logic for Dealing with Zero Placeholders
-We use a conditional if amount > 0: check to ignore placeholders while respecting the positional alignment.
-   * Case 1: Standard Progression (Talent Books & Common Drops)
-   For materials covering the full range, the standard mapping works by skipping initial zeros.`i + 1` correctly maps the index to the target level.
-      ```py
-      # i + 1 correctly maps index 5 to level 6 (the 6 -> 7 step)
-      if amount > 0:
-      materials_by_level[i + 1].append(...)
-      ```
 
-   * Case 2: Weekly Boss Drops (Hardcoded "Short List" Exception)
-   [NEW] Weekly Boss materials often omit the first six placeholders, resulting in a list of only 4 items (for levels 7-10). The code must detect this length and apply a hardcoded offset.
-      ```py
-      elif len(amounts) == 4:
-      start_level = 6  # Offset to start the range at Level 7
-      # start_level + i maps index 0 to level 6 (the 6 -> 7 step)
-      materials_by_level[start_level + i].append(...)
-      ```
+### 3.2b 🗂️ Character JSON Schema Reference
+
+This section exists because the schema below was never fully written down anywhere, and every field on it has been the source of a real bug at some point - either in the library code or in something built against it. Treat this as the source of truth over any other description of the schema in this document, this codebase, or your own memory of it.
+
+Top-level keys on a character's JSON object (confirmed present on every character file as of this writing): `name`, `element`, `weapon_type`, `region`, `role`, `rarity`, `affiliation`, `birthday`, `additional_titles`, `constellation_name`, `ascension_stat`, `stats_table`, `ascension_levels`, `ascension_materials`, `talents`, `constellations`.
+
+**There is no `title`, `description`, or `icon` key.** Character titles live in `additional_titles`, which is a **list** of strings (usually one entry, but treat it as a list) - not a singular string. If you're adding icon/description support, that's new schema, not a rename of an existing field.
+
+**`ascension_materials` vs `ascension_levels` - these are not interchangeable, and mixing them up is the single most common source of bugs in this codebase so far:**
+- `ascension_materials` is a small fixed dict with 4 keys - `gems`, `boss_mat`, `local_specialty`, `common_mat` - each holding `{"name": ..., "link": ...}` for the **untiered family name** (e.g. `"Varunada Lazurite"`). This exists purely to label/group a character's 4 material slots for a short summary display (see `genshin.py`'s `/character_data` embed for a working example). It has no amounts and cannot be used to look up a specific tier's cost.
+- `ascension_levels` is a dict keyed by the **exact tiered material name** (e.g. `"Varunada Lazurite Silver"`, `"Varunada Lazurite Fragment"`), each holding `{"A1": {"level_range": ..., "amount": <int>, "link": ...}, "A2": {...}, ...}` - this is where actual per-tier amounts live, and it's the correct key to search or sum against. `find_characters_by_material` / `find_characters_by_material_sql` both match against this, not against `ascension_materials`.
+- If you ever need to go from a family name (`"Varunada Lazurite"`) to its tiered variants, you have to build that mapping yourself by cross-referencing the two - there's no `ascension_levels` key that contains the untiered name, and no `ascension_materials` field that lists the tiers.
+
+**`talents` is a list where `level_materials` is polymorphic depending on the talent's `type`:**
+- For the 3 active-combat types - `"Normal Attack"`, `"Elemental Skill"`, `"Elemental Burst"` - `level_materials` is a dict, e.g. `{"level": [{"material": ..., "amount": "0-3-4-6-9", "link": ...}, ...]}`. In practice **only the first talent in the list (`talents[0]`, always Normal Attack) has this populated** - Skill and Burst store `level_materials: {}` (empty dict, no `"level"` key), because their costs are identical to Attack's in-game and aren't duplicated in the data. Any code walking materials from Skill/Burst needs to fall back to `talents[0]`, not read an empty list as "no materials."
+- For every other talent type (passives - the exact type string varies per character, e.g. `"1st Ascension Passive"`, `"Utility Passive"`, `"Moonsign Benediction Passive"`) `level_materials` is a **plain string**, not a dict - it holds an unlock-condition label (`"A1"`, `"A4"`, `"Utiliy (Auto-unlocked)"`, etc.), completely unrelated in shape to the active-talent case. Code that assumes `level_materials` is always a dict and calls `.get("level", [])` on it unconditionally will crash (`AttributeError`) the moment it reaches a passive talent - check `isinstance(level_materials, dict)` first.
+- Because Skill/Burst duplicate Attack's cost data by convention, don't insert/count materials once per talent in that list - do it once, from `talents[0]`, or totals come out inflated by however many active talents happen to share that cost (confirmed: 3x for a typical character with Attack+Skill+Burst).
+
+**Amount strings have two unrelated encodings depending on where they live** - see §3.3 for the full talent-side breakdown:
+- `talents[].level_materials.level[].amount`: a `"-"`-joined positional progression string (talent side). Sum every digit segment for a grand total; don't assume exactly 2 segments.
+- `ascension_levels[material][tier].amount`: a single plain integer, already per-tier, no encoding to parse.
+
+
+### 3.3 🧩 Talent Material Retrieval: Handling Positional Data
+The material amount string is a compressed, positionally indexed list (e.g., `"0-0-0-0-0-4-6-9-12"`). Zeros are placeholders used to keep the alignment consistent across different material types, some of which don't start dropping until a later level-up step.
+
+* A. Understanding the Positional Indexing
+
+The code parses the raw string into an `amounts` list, split on `-`. **The list is 0-indexed, and index `i` always maps to `amounts_by_index[i]`, the same variable the code actually uses** - this section previously described a different, sparser scheme (`materials_by_level[1]`, `[6]`, `[9]`) that never matched the real implementation; ignore any older version of this section if you have one cached. The header shown to the user is `f"Level {idx + 1} -> {idx + 2}"`:
+
+| Index | Level-Up Step |
+|---|---|
+| 0 | 1 -> 2 |
+| 1 | 2 -> 3 |
+| 2 | 3 -> 4 |
+| 3 | 4 -> 5 |
+| 4 | 5 -> 6 |
+| 5 | 6 -> 7 |
+| 6 | 7 -> 8 |
+| 7 | 8 -> 9 |
+| 8 | 9 -> 10 |
+
+This matches the table in §4.1 exactly - if the two ever disagree again, trust §4.1's table and the code, not prose.
+
+* B. The Logic for Dealing with Zero Placeholders
+
+We use a conditional `if amount > 0:` check to ignore placeholders while respecting the positional alignment.
+
+  * Case 1: Standard Progression (Talent Books & Common Drops)
+
+    A 9-segment string maps directly, one segment per index, skipping zeros:
+    ```py
+    for i, amt in enumerate(amounts):
+        if i < 9 and amt > 0:
+            mats_by_index[i].append(...)
+    ```
+
+  * Case 2: Weekly Boss Drops (4-item short list)
+
+    Weekly-boss materials never appear before level 60 (the level 6->7 step), so instead of storing a 9-segment string with 5 leading zeros, they're stored as a **4-item list** covering indices 5-8 only. Detected purely by `len(amounts) == 4` - there is no explicit tag on the material marking it as a boss drop, so this length check must stay reliable; a non-boss material with exactly 4 non-zero level-up steps would currently be misread as a boss material and offset incorrectly. Confirmed as of this writing that no such collision exists in the roster.
+    ```py
+    elif len(amounts) == 4:  # Weekly Boss Offset
+        for i, amt in enumerate(amounts):
+            if amt > 0:
+                mats_by_index[i + 5].append(...)  # i=0 -> index 5 (Level 6->7)
+    ```
+
+  * Case 3: Crown of Insight
+
+    Always a flat `"1"`, pinned directly to index 8 (Level 9->10) regardless of string content:
+    ```py
+    if "Crown of Insight" in mat_name:
+        mats_by_index[8].append({'amt': 1, ...})
+    ```
+
+  * Ascension materials use the same `amount > 0` style summing but are NOT positionally encoded - each tier (`"A1"`, `"A2"`, ...) stores one plain integer amount directly, e.g. `ascension_levels["Broken Drive Shaft"]["A1"]["amount"] == 3`. Don't apply the talent parsing logic above to ascension amounts; they're a different shape entirely (see the schema reference below).
