@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='genshin-impact',
-    version='0.1.2',
+    version='0.1.9dev1',
     packages=find_packages(),
     py_modules=['LibTest'],
     include_package_data=True,

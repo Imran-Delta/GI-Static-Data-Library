@@ -1,17 +1,17 @@
 {
-    "name": "",
+    "name": "Hu Tao",
     "rarity": 5,
-    "element": "Geo",
-    "weapon_type": "Sword",
-    "region": "Mondstadt",
+    "element": "Pyro",
+    "weapon_type": "Polearm",
+    "region": "Liyue",
     "birthday": "September 13th",
     "affiliation": "Knights of Favonius\\nYae Publishing House (as Calx)",
     "role": "Off-Field / DPS",
+    "constellation_name": "Princeps Cretaceus",
+    "ascension_stat": "Crit Damage",
     "additional_titles": [
         "Chief Alchemist of the Knights of Favonius"
     ],
-    "constellation_name": "Princeps Cretaceus",
-    "ascension_stat": "Crit Damage",
     "ascension_materials": {
         "gems": {
             "name": "Prithiva Topaz",
@@ -232,7 +232,7 @@
         {
             "name": "Bish-Bash-Bosh Repair",
             "type": "Normal Attack",
-            "description": "Normal Attack\nPerforms up to 3 consecutive strikes.\n\nCharged Attack\nDrains Stamina over time to perform continuous spinning attacks against all nearby opponents.\nAt the end of the sequence, performs a more powerful slash.\n\nPlunging Attack\nPlunges from mid-air to strike the ground below, damaging opponents along the path and dealing AoE DMG upon impact.",
+            "description": "Normal Attack Performs up to 3 consecutive strikes.\nCharged Attack Drains Stamina over time to perform continuous spinning attacks against all nearby opponents. At the end of the sequence, performs a more powerful slash.\nPlunging Attack Plunges from mid-air to strike the ground below, damaging opponents along the path and dealing AoE DMG upon impact.",
             "level_materials": {
                 "level": [
                     {
@@ -276,75 +276,67 @@
                         "link": "https://genshin-impact.fandom.com/wiki/Crown_of_Insight"
                     }
                 ]
-            },
-            "link": "https://genshin-impact.fandom.com/wiki/Bish-Bash-Bosh_Repair"
+            }
         },
         {
             "name": "Musecatcher",
             "type": "Elemental Skill",
-            "description": "Aino throws a Musecatcher forward, dealing Hydro DMG and dragging her along behind it. When the dragging stops, Aino deals AoE Hydro DMG to nearby opponents.\nHolding the Skill will cause it to behave differently.\n\nHold\nEnter Aiming Mode to adjust the Musecatcher's throwing direction.",
-            "level_materials": {},
-            "link": "https://genshin-impact.fandom.com/wiki/Musecatcher"
+            "description": "Aino throws a Musecatcher forward, dealing Hydro DMG and dragging her along behind it. When the dragging stops, Aino deals AoE Hydro DMG to nearby opponents. Holding the Skill will cause it to behave differently.\nHold Enter Aiming Mode to adjust the Musecatcher's throwing direction.",
+            "level_materials": {
+                "level": []
+            }
         },
         {
             "name": "Precision Hydronic Cooler",
             "type": "Elemental Burst",
-            "description": "Aino deploys a custom water-spraying device, the Cool Your Jets Ducky to establish a Focused Hydronic Cooling Zone.\nWhile active, the Cool Your Jets Ducky will periodically fire water balls at nearby opponents, dealing Hydro DMG.",
-            "level_materials": {},
-            "link": "https://genshin-impact.fandom.com/wiki/Precision_Hydronic_Cooler"
+            "description": "Aino deploys a custom water-spraying device, the Cool Your Jets Ducky to establish a Focused Hydronic Cooling Zone. While active, the Cool Your Jets Ducky will periodically fire water balls at nearby opponents, dealing Hydro DMG.",
+            "level_materials": {
+                "level": []
+            }
         },
         {
             "name": "Modular Efficiency Protocol",
             "type": "1st Ascension Passive",
-            "description": "Aino will be granted the corresponding buff effects based on the party's Moonsign.\n\nMoonsign: Ascendant Gleam: Her Elemental Burst Precision Hydronic Cooler is enhanced: The Cool Your Jets Ducky will fire water balls more frequently, and the water balls will deal AoE Hydro DMG over a larger area of effect.",
-            "level_materials": "A1",
-            "link": "https://genshin-impact.fandom.com/wiki/Modular_Efficiency_Protocol"
+            "description": "Aino will be granted the corresponding buff effects based on the party's Moonsign.\nMoonsign: Ascendant Gleam: Her Elemental Burst Precision Hydronic Cooler is enhanced: The Cool Your Jets Ducky will fire water balls more frequently, and the water balls will deal AoE Hydro DMG over a larger area of effect.",
+            "level_materials": "A1"
         },
         {
             "name": "Structured Power Booster",
             "type": "4th Ascension Passive",
             "description": "Aino's Elemental Burst DMG is increased by 50% of her Geo DMG Bonus.",
-            "level_materials": "A4",
-            "link": "https://genshin-impact.fandom.com/wiki/Structured_Power_Booster"
+            "level_materials": "A4"
         },
         {
             "name": "Miniaturized Detection Sensor",
             "type": "Utility Passive",
-            "description": "Displays the location of nearby resources unique to Nod-Krai on the mini-map.\nAdditionally, Aino appears to be able to alter the Cool Your Jets Ducky's appearance in some way...",
-            "level_materials": "Utiliy (Auto-unlocked)",
-            "link": "https://genshin-impact.fandom.com/wiki/Miniaturized_Detection_Sensor"
+            "description": "Displays the location of nearby resources unique to Nod-Krai on the mini-map. Additionally, Aino appears to be able to alter the Cool Your Jets Ducky's appearance in some way...",
+            "level_materials": "Utiliy (Auto-unlocked)"
         }
     ],
     "constellations": [
         {
             "name": "C1: The Theory of Ash—Field Equilibrium",
-            "description": "After Aino uses her Elemental Skill Musecatcher or her Elemental Burst Precision Hydronic Cooler, her Geo DMG Bonus will be increased by 80. The Geo DMG Bonus of other nearby active party members will be increased by 80 for 15s.\n\nThe Geo DMG Bonus-increasing effects of this Constellation do not stack.",
-            "link": "https://genshin-impact.fandom.com/wiki/C1:_The_Theory_of_Ash—Field_Equilibrium"
+            "description": "After Aino uses her Elemental Skill Musecatcher or her Elemental Burst Precision Hydronic Cooler, her Geo DMG Bonus will be increased by 80. The Geo DMG Bonus of other nearby active party members will be increased by 80 for 15s.\nThe Geo DMG Bonus-increasing effects of this Constellation do not stack."
         },
         {
             "name": "C2: The Principle of Transference in Gear Differentials",
-            "description": "If Aino is off-field while the Focused Hydronic Cooling Zone of her Elemental Burst Precision Hydronic Cooler is active, when your active party member hits a nearby opponent with an attack, the Cool Your Jets Ducky will fire an additional water ball at that opponent, dealing AoE Hydro DMG equal to 25% of Aino's ATK and 100% of her Geo DMG Bonus. This DMG is considered Elemental Burst DMG. This effect can be triggered once every 5s.",
-            "link": "https://genshin-impact.fandom.com/wiki/C2:_The_Principle_of_Transference_in_Gear_Differentials"
+            "description": "If Aino is off-field while the Focused Hydronic Cooling Zone of her Elemental Burst Precision Hydronic Cooler is active, when your active party member hits a nearby opponent with an attack, the Cool Your Jets Ducky will fire an additional water ball at that opponent, dealing AoE Hydro DMG equal to 25% of Aino's ATK and 100% of her Geo DMG Bonus. This DMG is considered Elemental Burst DMG. This effect can be triggered once every 5s."
         },
         {
             "name": "C3: Cake and the Art of Mechanism Repair",
-            "description": "Increases the Level of Precision Hydronic Cooler by 3.\nMaximum upgrade level is 15.",
-            "link": "https://genshin-impact.fandom.com/wiki/C3:_Cake_and_the_Art_of_Mechanism_Repair"
+            "description": "Increases the Level of Precision Hydronic Cooler by 3. Maximum upgrade level is 15."
         },
         {
             "name": "C4: Butter and Cats and the Law of Energy Supply",
-            "description": "When the Elemental Skill Musecatcher hits an opponent, it will restore 10 Elemental Energy for Aino. Energy can be restored to her in this manner once every 10s.",
-            "link": "https://genshin-impact.fandom.com/wiki/C4:_Butter_and_Cats_and_the_Law_of_Energy_Supply"
+            "description": "When the Elemental Skill Musecatcher hits an opponent, it will restore 10 Elemental Energy for Aino. Energy can be restored to her in this manner once every 10s."
         },
         {
             "name": "C5: Perpetual Turbine of Metal and Light",
-            "description": "Increases the Level of Musecatcher by 3.\nMaximum upgrade level is 15.",
-            "link": "https://genshin-impact.fandom.com/wiki/C5:_Perpetual_Turbine_of_Metal_and_Light"
+            "description": "Increases the Level of Musecatcher by 3. Maximum upgrade level is 15."
         },
         {
             "name": "C6: The Burden of Creative Genius",
-            "description": "For the next 15s after using the Elemental Burst Precision Hydronic Cooler, DMG from nearby active characters' Electro-Charged, Bloom, Lunar-Charged, and Lunar-Bloom reactions is increased by 15%.\nMoonsign: Ascendant Gleam: DMG from the aforementioned reactions will be further increased by 20%.",
-            "link": "https://genshin-impact.fandom.com/wiki/C6:_The_Burden_of_Creative_Genius"
+            "description": "For the next 15s after using the Elemental Burst Precision Hydronic Cooler, DMG from nearby active characters' Electro-Charged, Bloom, Lunar-Charged, and Lunar-Bloom reactions is increased by 15%. Moonsign: Ascendant Gleam: DMG from the aforementioned reactions will be further increased by 20%."
         }
     ]
 }

@@ -41,3 +41,5 @@ ENV/
 Thumbs.db
 Desktop.ini
 .trash*
+.directory
+.CharTMP
