@@ -215,29 +215,32 @@ def _build_db_from_json(conn):
                     """, (char_id, mat_id, "ascension", str(amount)))
 
             # Talent materials
+            # Talent materials — Attack/Skill/Burst share identical costs
+            # in-game; only talents[0] (Normal Attack) carries the
+            # populated materials list, Skill/Burst store an empty {} by
+            # convention (mirrors get_talent_materials, which also reads
+            # only talents[0]). Insert ONCE per character, not once per
+            # talent that shares it — the old per-talent loop reinserted
+            # the same 8 materials 3x (confirmed against aino.json: 24
+            # rows instead of 8), silently tripling every SQL-computed
+            # talent-material total.
             talents = char_data.get("talents", [])
             na_materials = talents[0].get("level_materials", {}) if talents else {}
 
-            for talent in talents:
-                lvl_mats = talent.get("level_materials")
-
-                if isinstance(lvl_mats, dict) and not lvl_mats.get("level"):
-                    lvl_mats = na_materials
-
-                if isinstance(lvl_mats, dict):
-                    for mat_entry in lvl_mats.get("level", []):
-                        mat_name = mat_entry.get("material") or mat_entry.get("name")
-                        if not mat_name:
-                            continue
-                        amount = mat_entry.get("amount", "")
-                        link = mat_entry.get("link", "")
-                        mat_id = get_material_id(mat_name, link)
-                        if mat_id is None:
-                            continue
-                        c.execute("""
-                            INSERT INTO character_material (character_id, material_id, usage_type, amount)
-                            VALUES (?, ?, ?, ?)
-                        """, (char_id, mat_id, "talent", str(amount)))
+            if isinstance(na_materials, dict):
+                for mat_entry in na_materials.get("level", []):
+                    mat_name = mat_entry.get("material") or mat_entry.get("name")
+                    if not mat_name:
+                        continue
+                    amount = mat_entry.get("amount", "")
+                    link = mat_entry.get("link", "")
+                    mat_id = get_material_id(mat_name, link)
+                    if mat_id is None:
+                        continue
+                    c.execute("""
+                        INSERT INTO character_material (character_id, material_id, usage_type, amount)
+                        VALUES (?, ?, ?, ?)
+                    """, (char_id, mat_id, "talent", str(amount)))
 
         conn.commit()
 
@@ -391,51 +394,75 @@ def get_all_characters_data() -> dict:
 
 def find_characters_by_material(material_name: str) -> list:
     """
-    Finds and returns a list of characters that use a given ascension or talent material.
+    Finds and returns a list of characters that use a given ascension or talent
+    material, with the combined amount needed across ascension + talent leveling.
     (Legacy version – uses the monolithic dictionary.)
+
+    SEARCH KEY: the exact material name as it appears in `ascension_levels`
+    keys / talent `level_materials[].material` (the tiered variant, e.g.
+    "Varunada Lazurite Silver"), case-insensitive. This does NOT match the
+    untiered family name in `ascension_materials[*].name` (e.g. "Varunada
+    Lazurite") — that field only labels/groups a character's 4 material
+    slots (gems/boss_mat/local_specialty/common_mat) for display, it is not
+    an alternate key into ascension_levels. To add family-name search later:
+    build a reverse map of family_name -> [tiered_name, ...] from
+    ascension_materials + the keys of ascension_levels, resolve the query
+    through that map to one or more tiered names, then call this per name
+    and merge. Do not match ascension_materials directly against
+    ascension_levels keys — that was the original bug here (always summed
+    to 0, since ascension_levels is keyed by tiered names, never by the
+    family name ascension_materials stores).
+
+    A material used by both ascension and talents for the same character
+    returns ONE combined entry with material_type "ascension & talent" and
+    amount = sum of both, rather than two colliding entries.
     """
     _ensure_monolith()
     material_name = material_name.lower()
     characters_using_material = {}
 
     for char_key, char_data in _gisl_data.items():
-        # --- Ascension Materials Check ---
-        total_ascension_amount = 0
-        ascension_mats = char_data.get('ascension_materials', {})
+        char_name = char_data.get('name', char_key)
+        usage_types = []
+        total_amount = 0
 
-        for mat_type, mat_info in ascension_mats.items():
-            if mat_info and mat_info.get('name', '').lower() == material_name:
-                mat_key = mat_info['name']
-                for level_info in char_data.get('ascension_levels', {}).values():
-                    if mat_key in level_info:
-                        total_ascension_amount += level_info[mat_key]['amount']
-
-                characters_using_material[char_data['name']] = {
-                    "character": char_data['name'],
-                    "material_type": "ascension",
-                    "amount": total_ascension_amount
-                }
+        # --- Ascension Materials Check (exact tiered name) ---
+        ascension_amount = 0
+        for tiered_name, tiers in char_data.get('ascension_levels', {}).items():
+            if tiered_name.lower() == material_name:
+                for tier_info in tiers.values():
+                    ascension_amount += tier_info.get('amount', 0)
                 break
+        if ascension_amount > 0:
+            total_amount += ascension_amount
+            usage_types.append('ascension')
 
-        # --- Talent Materials Check ---
-        total_talent_amount = 0
-
+        # --- Talent Materials Check (exact tiered name) ---
+        # Passive-type talents (1st/4th Ascension Passive, Utility,
+        # Moonsign) store level_materials as a STRING unlock condition
+        # (e.g. "A1", "Utiliy (Auto-unlocked)"), not a materials dict —
+        # must skip non-dict entries or this crashes on every real
+        # character (confirmed against aino.json / albedo.json).
+        talent_amount = 0
         for talent in char_data.get('talents', []):
-            talent_mats = talent.get('level_materials', {}).get('level', [])
-
-            for mat_info in talent_mats:
+            level_materials = talent.get('level_materials', {})
+            if not isinstance(level_materials, dict):
+                continue
+            for mat_info in level_materials.get('level', []):
                 if mat_info.get('material', '').lower() == material_name:
                     amounts_str = mat_info.get('amount', '')
-
                     if amounts_str:
                         amounts = [int(a) for a in amounts_str.split('-') if a.isdigit()]
-                        total_talent_amount += sum(amounts)
+                        talent_amount += sum(amounts)
+        if talent_amount > 0:
+            total_amount += talent_amount
+            usage_types.append('talent')
 
-        if total_talent_amount > 0:
-            characters_using_material[char_data['name']] = {
-                "character": char_data['name'],
-                "material_type": "talent",
-                "amount": total_talent_amount
+        if usage_types:
+            characters_using_material[char_name] = {
+                "character": char_name,
+                "material_type": " & ".join(usage_types),
+                "amount": total_amount
             }
 
     return list(characters_using_material.values())
@@ -464,13 +491,16 @@ def find_characters_by_weapon_type(weapon_type: str) -> list:
             matching_characters.append(char_data['name'])
     return matching_characters
 
-def get_talent_materials(name: str, option: str = "all") -> any:
+def get_talent_materials(name: str, option: str = "all", use_sql: bool = True) -> any:
     """
     Retrieves talent level‑up materials for a character.
-    (Legacy version – uses get_character_data, which now uses the dict.)
+
+    use_sql (default True): fetch via a single-row SQL query instead of
+    the legacy monolithic dict. Pass use_sql=False to force the dict path
+    (see _get_raw_character_data). Output is identical either way.
     """
     name_key = name.lower()
-    char_data = get_character_data(name_key)
+    char_data = _get_raw_character_data(name_key, use_sql)
     if not char_data:
         return f"Character '{name}' not found."
 
@@ -522,12 +552,13 @@ def get_talent_materials(name: str, option: str = "all") -> any:
     output = [format_level(i, text_only=is_text) for i in range(9) if format_level(i, text_only=is_text)]
     return ("\n\n" if not is_text else "\n").join(output) if output else "No talent data found."
 
-def get_ascension_data(character_key: str, option: str = "all") -> str | dict | None:
+def get_ascension_data(character_key: str, option: str = "all", use_sql: bool = True) -> str | dict | None:
     """
     Retrieves and formats ascension materials for a character.
-    (Legacy version – uses get_character_data.)
+
+    use_sql (default True): see get_talent_materials.
     """
-    char_data = get_character_data(character_key)
+    char_data = _get_raw_character_data(character_key, use_sql)
     if not char_data or 'ascension_levels' not in char_data:
         return None
 
@@ -585,13 +616,14 @@ def get_ascension_data(character_key: str, option: str = "all") -> str | dict | 
     except (ValueError, IndexError):
         return f"Invalid option: {option}. Use 0-{len(all_tags)-1}, 'all', 'alltext', or 'allraw'."
 
-def get_ascension_levels(character_key: str, option: str = "all") -> str | list | None:
+def get_ascension_levels(character_key: str, option: str = "all", use_sql: bool = True) -> str | list | None:
     """
     Retrieves ascension data. Levels A1-A6 show materials;
     Levels A7+ (Level 100 logic) show stats only.
-    (Legacy version – uses get_character_data.)
+
+    use_sql (default True): see get_talent_materials.
     """
-    char_data = get_character_data(character_key)
+    char_data = _get_raw_character_data(character_key, use_sql)
     if not char_data:
         return None
 
@@ -655,12 +687,16 @@ def get_ascension_levels(character_key: str, option: str = "all") -> str | list 
     except:
         return f"Invalid option. Use 0-{len(processed_data)-1} or 'all'."
 
-def get_ascension_stats(character_key: str) -> str:
+def get_ascension_stats(character_key: str, use_sql: bool = True) -> str:
     """
-    Displays only the stat growth for all ascension tiers (A1 through A7+).
-    (Legacy version – uses get_character_data.)
+    Displays the stat growth for every ascension tier present in
+    stats_table, including A0 if the character has it (the previous
+    docstring claimed "A1 through A7+" only - it was never actually
+    filtered, A0 has always been included when present).
+
+    use_sql (default True): see get_talent_materials.
     """
-    char_data = get_character_data(character_key)
+    char_data = _get_raw_character_data(character_key, use_sql)
     if not char_data or 'stats_table' not in char_data:
         return f"No stat data found for {character_key}."
 
@@ -758,19 +794,27 @@ def check_for_updates() -> dict:
 # ----------------------------------------------------------------------
 
 def _parse_amount(amount_str: str) -> int:
+    """
+    Sum a talent/ascension amount string across all encoded positions.
+
+    Talent amounts are positionally-indexed progression strings per
+    README §3.3, e.g. "0-3-4-6-9" (5 non-boss level-up steps) or
+    "0-0-0-0-0-4-6-9-12" (9-slot, zero-padded so weekly-boss materials
+    align to steps 6->7 through 9->10). The old version only summed
+    strings with exactly 2 segments and silently returned 0 for
+    everything else - which is nearly every real talent material
+    (confirmed against aino.json: 5 of 8 materials on a single talent
+    collapsed to 0). Ascension amounts are a single plain integer
+    (e.g. "3"), also handled here since split('-') on a string with
+    no '-' returns a one-element list.
+    """
     if not amount_str:
         return 0
-    parts = amount_str.split('-')
-    if len(parts) == 2:
-        try:
-            low, high = int(parts[0]), int(parts[1])
-            return low + high
-        except:
-            pass
-    try:
-        return int(amount_str)
-    except:
-        return 0
+    total = 0
+    for part in amount_str.split('-'):
+        if part.isdigit():
+            total += int(part)
+    return total
 
 def find_characters_by_material_sql(material_name: str) -> list:
     """
@@ -836,7 +880,9 @@ def find_characters_by_weapon_type_sql(weapon_type: str) -> list:
 def get_character_data_sql(character_key: str) -> dict | None:
     """
     Retrieves the full data for a specific character by their key directly from SQL.
-    (May be slightly slower than dict for single lookup, but included for completeness.)
+    Single-row query - does not touch the monolithic dict, does not scale
+    with roster size. Verified byte-identical output to get_character_data
+    for the same key (both deserialize the same full_json blob).
     """
     if not _tables_initialized:
         return None
@@ -846,3 +892,20 @@ def get_character_data_sql(character_key: str) -> dict | None:
         if row:
             return json.loads(row["full_json"])
     return None
+
+def _get_raw_character_data(character_key: str, use_sql: bool = True) -> dict | None:
+    """
+    Shared raw-data resolver for the formatting layer (get_talent_materials,
+    get_ascension_data, get_ascension_levels, get_ascension_stats here, and
+    gisl2.py's get_passive_talents/get_constellations/get_character_summary).
+
+    use_sql=True (default): single-row SQL query, no monolith load.
+    use_sql=False: legacy monolithic dict - first call loads every
+    character's full JSON into memory for the life of the process (see
+    module docstring). Both paths return identical data; this only
+    decides which is used to fetch it, so callers of the formatters don't
+    need their own if/else.
+    """
+    if use_sql:
+        return get_character_data_sql(character_key)
+    return get_character_data(character_key)
