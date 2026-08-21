@@ -20,13 +20,11 @@ wheels/
 .installed.cfg
 *.egg
 venv/
+.pytest_cache
 
 # --- GISL Specifics ---
-# We keep the JSONs, but block the auto-generated database
 *.db
 *.sqlite3
-
-# Block your local backup files
 *.bak
 *.tmp
 

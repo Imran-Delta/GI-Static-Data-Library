@@ -1,373 +1,327 @@
 #!/usr/bin/env python3
 """
-Genshin Impact Library Interactive Test (Overhauled)
------------------------------------------------------
-Allows side-by-side testing of legacy (monolithic dict) and SQL-backed functions.
-Data entry is fully interactive – no hardcoded names.
+GISL Development Test Suite (Dynamic Function Coverage)
+
+Run with:
+    python LibTest.py
+    pytest LibTest.py -v
+
+The suite is organised as:
+    1. Compile every .py file in the project.
+    2. Verify imports of the package and its submodules.
+    3. Directly check every character JSON file for schema consistency.
+    4. Dynamically discover all public functions in the library modules,
+       inspect their parameters, and call them with appropriate test values
+       derived from data (characters) or hardcoded lists (elements/weapons).
+       Any function whose first parameter matches a known category is
+       tested automatically, making the suite future‑proof.
 """
 
+import os
 import json
-import logging
+import pytest
+from pathlib import Path
+import importlib
 import sys
-from typing import Optional
+import inspect
+import py_compile
 
 # ----------------------------------------------------------------------
-# Try to import the library
+# Paths and constants
 # ----------------------------------------------------------------------
-try:
-    from genshin_impact import (
-        check_for_updates,
-        get_character_data,
-        get_all_characters_data,
-        find_characters_by_material,
-        find_characters_by_element,
-        find_characters_by_weapon_type,
-        get_talent_materials,
-        get_ascension_data,
-        get_ascension_levels,
-        get_ascension_stats,
-        get_passive_talents,
-        get_constellations,
-        get_character_summary,
-        get_all_character_names,
-        get_all_material_names,
-        find_characters_by_criteria,  # SQL multi‑filter
-    )
-    # SQL‑specific functions (not in the main __init__ yet)
-    from genshin_impact.gisl import (
-        find_characters_by_material_sql,
-        find_characters_by_element_sql,
-        find_characters_by_weapon_type_sql,
-        get_character_data_sql,
-    )
-    library_available = True
-except ImportError as e:
-    print(f"❌ FATAL: {e}")
-    library_available = False
-    sys.exit(1)
+ROOT_DIR = Path(__file__).parent
+DATA_DIR = ROOT_DIR / "character_data"
+PACKAGE_NAME = "genshin_impact"   # adjust if different
 
-logger = logging.getLogger(__name__)
-
+# Hardcoded canonical lists (materials will be added later)
+ELEMENTS = ["Pyro", "Geo", "Anemo", "Hydro", "Cryo", "Electro", "Dendro"]
+WEAPONS  = ["Polearm", "Sword", "Catalyst", "Bow", "Claymore"]
 
 # ----------------------------------------------------------------------
-# Pretty printing helpers
+# Helpers
 # ----------------------------------------------------------------------
-def print_title(text: str):
-    print(f"\n{'=' * 60}\n  {text}\n{'=' * 60}")
+def get_character_files():
+    """Return sorted list of JSON files in the character data directory."""
+    if not DATA_DIR.exists():
+        return []
+    return sorted(DATA_DIR.glob("*.json"))
 
-def print_json(obj):
-    print(json.dumps(obj, indent=2, ensure_ascii=False))
+def get_character_keys():
+    """Return sorted list of character keys (stem without .json)."""
+    return [p.stem for p in get_character_files()]
 
-def print_list(items, prefix="• "):
-    for item in items:
-        print(f"{prefix}{item}")
+def load_json_direct(key):
+    """Load character JSON directly from file, bypassing the library."""
+    file_path = DATA_DIR / f"{key}.json"
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-
-# ----------------------------------------------------------------------
-# Utility: check for updates (called at startup)
-# ----------------------------------------------------------------------
-def show_update_status():
-    status = check_for_updates()
-    msg = status.get("message", "Unknown")
-    match status.get("status"):
-        case "update":
-            print(f"✨ UPDATE AVAILABLE: {msg}")
-        case "outdated_dev":
-            print(f"⚠️ DEV BUILD OUTDATED: {msg}")
-        case "dev":
-            print(f"🛠️ DEVELOPMENT MODE: {msg}")
-        case "ok":
-            print(f"✅ {msg}")
-        case _:
-            print(f"⚠️ UPDATE CHECK FAILED: {msg}")
-
+def import_module(name):
+    """Import a module by name, returning the module object."""
+    return importlib.import_module(name)
 
 # ----------------------------------------------------------------------
-# Interactive data retrieval
+# Module‑level fixtures
 # ----------------------------------------------------------------------
-def prompt_character(default="aino") -> str:
-    """Ask for a character key (lowercase) with a default."""
-    name = input(f"Character key (default: {default}): ").strip()
-    return name if name else default
+@pytest.fixture(scope="module")
+def all_character_keys():
+    return get_character_keys()
 
-def prompt_query(label: str) -> str:
-    """Ask for a search query string."""
-    return input(f"Enter {label}: ").strip()
-
-def get_character_data_fn(use_sql: bool, key: str):
-    if use_sql:
-        return get_character_data_sql(key)
-    return get_character_data(key)
-
-
-# ----------------------------------------------------------------------
-# Menu actions
-# ----------------------------------------------------------------------
-def action_character_data(use_sql: bool):
-    key = prompt_character()
-    data = get_character_data_fn(use_sql, key)
-    if not data:
-        print(f"❌ Character '{key}' not found.")
-        return
-    print_title(f"Character Data for {data.get('name', key)} {'(SQL)' if use_sql else '(Legacy)'}")
-    print_json(data)
-
-def action_show_talents(use_sql: bool):
-    key = prompt_character()
-    data = get_character_data_fn(use_sql, key)
-    if not data:
-        print(f"❌ Character '{key}' not found.")
-        return
-    talents = data.get('talents', [])
-    if not talents:
-        print("No talent data.")
-        return
-    print_title(f"Talents for {data.get('name', key)}")
-    for t in talents:
-        print(f"\n[{t.get('type', '?')}] {t.get('name', '?')}")
-        print(f"  {t.get('description', 'No description.')}")
-
-def action_ascension_mats(use_sql: bool):
-    key = prompt_character()
-    data = get_character_data_fn(use_sql, key)
-    if not data:
-        print(f"❌ Character '{key}' not found.")
-        return
-    levels = data.get('ascension_levels', {})
-    if not levels:
-        print("No ascension data.")
-        return
-    mats_by_level = {f"A{i}": [] for i in range(1,7)}
-    totals = {}
-    for mat_name, lvls in levels.items():
-        for lvl_key, info in lvls.items():
-            if lvl_key in mats_by_level:
-                mats_by_level[lvl_key].append(f"{info.get('amount')}x {mat_name} ({info.get('level_range')})")
-                totals[mat_name] = totals.get(mat_name, 0) + info.get('amount', 0)
-    print_title(f"Ascension Materials for {data.get('name', key)}")
-    for lvl in [f"A{i}" for i in range(1,7)]:
-        if mats_by_level[lvl]:
-            print(f"\n{lvl}:")
-            print_list(mats_by_level[lvl])
-    print("\nTOTAL NEEDED:")
-    for name, count in totals.items():
-        print(f"  {count}x {name}")
-
-def action_stats(use_sql: bool):
-    key = prompt_character()
-    data = get_character_data_fn(use_sql, key)
-    if not data:
-        print(f"❌ Character '{key}' not found.")
-        return
-    stats_table = data.get('stats_table', {})
-    asc_stat = data.get('ascension_stat', '')
-    if not stats_table:
-        print("No stats data.")
-        return
-    print_title(f"Base Stats for {data.get('name', key)}")
-    for tier, st in stats_table.items():
-        line = f"{tier} ({st.get('level_range','')}): "
-        for stat_name in ['HP','ATK','DEF',asc_stat]:
-            if stat_name in st:
-                val = st[stat_name]
-                if isinstance(val, dict):
-                    line += f"{stat_name}: {val.get('low','?')}→{val.get('high','?')}  "
-                else:
-                    line += f"{stat_name}: {val}  "
-        print(line)
-
-def action_talent_mats(use_sql: bool):
-    key = prompt_character()
-    # get_talent_materials is legacy-only, but works on data fetched either way
-    result = get_talent_materials(key, "all")
-    print_title(f"Talent Materials for {key.title()}")
-    print(result)
-
-def action_constellations(use_sql: bool):
-    key = prompt_character()
-    data = get_character_data_fn(use_sql, key)
-    if not data:
-        print(f"❌ Character '{key}' not found.")
-        return
-    consts = data.get('constellations', [])
-    if not consts:
-        print("No constellation data.")
-        return
-    print_title(f"Constellations for {data.get('name', key)}")
-    for c in consts:
-        print(f"\n{c.get('name','?')}")
-        print(f"  {c.get('description','No description.')}")
-
-def action_find(use_sql: bool, search_type: str):
-    query = prompt_query(f"{search_type} name")
-    if search_type == "element":
-        if use_sql:
-            results = find_characters_by_element_sql(query)
-        else:
-            results = find_characters_by_element(query)
-    elif search_type == "weapon":
-        if use_sql:
-            results = find_characters_by_weapon_type_sql(query)
-        else:
-            results = find_characters_by_weapon_type(query)
-    elif search_type == "material":
-        if use_sql:
-            # Returns list of dicts with character, material_type, amount
-            raw = find_characters_by_material_sql(query)
-            results = [f"{r['character']} ({r['material_type']}): {r['amount']}" for r in raw]
-        else:
-            raw = find_characters_by_material(query)
-            results = [f"{r['character']} ({r['material_type']}): {r['amount']}" for r in raw]
-    else:
-        print("Invalid search type.")
-        return
-    print_title(f"{search_type.title()} search '{query}' {'[SQL]' if use_sql else '[Legacy]'}")
-    if not results:
-        print("No matches found.")
-    else:
-        print_list(results)
-
-def action_find_multi():
-    print("Leave a field blank to ignore it.")
-    material = input("Material (optional): ").strip() or None
-    element = input("Element (optional): ").strip() or None
-    weapon = input("Weapon type (optional): ").strip() or None
-    results = find_characters_by_criteria(material, element, weapon)
-    print_title("Multi‑criteria search (SQL)")
-    if not results:
-        print("No matches found.")
-    else:
-        print_list(results)
-
-def action_passive_talents():
-    key = prompt_character()
-    res = get_passive_talents(key, "all")
-    print_title(f"Passive Talents for {key.title()}")
-    print(res)
-
-def action_constellations_index():
-    key = prompt_character()
-    idx = input("Constellation index (0-5): ").strip()
+@pytest.fixture(scope="module")
+def library():
+    """Import the main package and its submodules."""
     try:
-        res = get_constellations(key, idx)
-        print_title(f"Constellation {idx} for {key.title()}")
-        print(res)
+        pkg = import_module(PACKAGE_NAME)
+        gisl_mod = import_module(f"{PACKAGE_NAME}.gisl")
+        gisl2_mod = import_module(f"{PACKAGE_NAME}.gisl2")
+        return pkg, gisl_mod, gisl2_mod
     except Exception as e:
-        print(f"Error: {e}")
+        pytest.skip(f"Library import failed: {e}")
 
-def action_summary():
-    key = prompt_character()
-    res = get_character_summary(key, "all")
-    print_title(f"Character Summary for {key.title()}")
-    print(res)
-
-def action_autocomplete_test():
-    prefix = input("Type start of character name: ").strip()
-    names = get_all_character_names()
-    matches = [(k,n) for k,n in names if prefix.lower() in n.lower()]
-    print_title(f"Autocomplete matches for '{prefix}'")
-    for key, name in matches[:25]:
-        print(f"  {name} (key: {key})")
-
-
-# ----------------------------------------------------------------------
-# Main menu loop
-# ----------------------------------------------------------------------
-def main():
-    show_update_status()
-    default_char = "aino"
-    use_sql_default = False
-
-    while True:
-        print("\n" + "=" * 60)
-        print("  Genshin Impact Library Test Suite (Overhauled)")
-        print("=" * 60)
-        print(f"  Default character: {default_char}")
-        print("  SQL mode (for applicable ops): ", "ON" if use_sql_default else "OFF")
-        print("-" * 60)
-        print("  1  : Set default character key")
-        print("  2  : Toggle SQL mode for data/retrieval ops")
-        print("--- Character Data ---")
-        print("  3  : Get Character Data (legacy)")
-        print("  4  : Get Character Data (SQL)")
-        print("  5  : Show Talents")
-        print("  6  : Show Ascension Materials")
-        print("  7  : Show Base Stats")
-        print("  8  : Show Talent Materials (formatted)")
-        print("  9  : Show Constellations")
-        print("--- Find Characters ---")
-        print("  10 : Find by Element (legacy)")
-        print("  11 : Find by Element (SQL)")
-        print("  12 : Find by Material (legacy)")
-        print("  13 : Find by Material (SQL)")
-        print("  14 : Find by Weapon (legacy)")
-        print("  15 : Find by Weapon (SQL)")
-        print("  16 : Find by multiple criteria (SQL)")
-        print("--- New Convenience Functions ---")
-        print("  17 : Passive Talents")
-        print("  18 : Single Constellation (by index)")
-        print("  19 : Character Summary")
-        print("  20 : Autocomplete simulation")
-        print("--- Other ---")
-        print("  21 : Check for updates")
-        print("  0  : Exit")
-        print("-" * 60)
-        choice = input("Enter choice: ").strip()
-
+@pytest.fixture(scope="module")
+def all_json_data():
+    """Load all character JSON files directly into memory."""
+    data = {}
+    for key in get_character_keys():
         try:
-            # Utility toggles
-            if choice == '1':
-                default_char = prompt_character(default_char)
-            elif choice == '2':
-                use_sql_default = not use_sql_default
-                print(f"SQL mode for data ops: {'ON' if use_sql_default else 'OFF'}")
-            # Character data ops (use current SQL toggle)
-            elif choice == '3':
-                action_character_data(use_sql=False)
-            elif choice == '4':
-                action_character_data(use_sql=True)
-            elif choice == '5':
-                action_show_talents(use_sql_default)
-            elif choice == '6':
-                action_ascension_mats(use_sql_default)
-            elif choice == '7':
-                action_stats(use_sql_default)
-            elif choice == '8':
-                action_talent_mats(use_sql_default)  # always legacy function, but ok
-            elif choice == '9':
-                action_constellations(use_sql_default)
-            # Find ops (separate legacy/SQL)
-            elif choice == '10':
-                action_find(use_sql=False, search_type="element")
-            elif choice == '11':
-                action_find(use_sql=True, search_type="element")
-            elif choice == '12':
-                action_find(use_sql=False, search_type="material")
-            elif choice == '13':
-                action_find(use_sql=True, search_type="material")
-            elif choice == '14':
-                action_find(use_sql=False, search_type="weapon")
-            elif choice == '15':
-                action_find(use_sql=True, search_type="weapon")
-            elif choice == '16':
-                action_find_multi()
-            elif choice == '17':
-                action_passive_talents()
-            elif choice == '18':
-                action_constellations_index()
-            elif choice == '19':
-                action_summary()
-            elif choice == '20':
-                action_autocomplete_test()
-            elif choice == '21':
-                show_update_status()
-            elif choice == '0':
-                print("Goodbye!")
-                break
-            else:
-                print("Invalid choice.")
+            data[key] = load_json_direct(key)
         except Exception as e:
-            print(f"❌ Unexpected error: {e}")
+            print(f"Warning: could not load {key}.json: {e}")
+    return data
 
+# ----------------------------------------------------------------------
+# 1. Python files compile
+# ----------------------------------------------------------------------
+class TestPythonFilesCompile:
+    def test_all_python_files_compile(self):
+        errors = []
+        for py_file in ROOT_DIR.rglob("*.py"):
+            try:
+                py_compile.compile(str(py_file), doraise=True)
+            except py_compile.PyCompileError as e:
+                errors.append(f"{py_file}: {e}")
+        assert not errors, f"Compile errors:\n" + "\n".join(errors)
+
+# ----------------------------------------------------------------------
+# 2. Import checks
+# ----------------------------------------------------------------------
+class TestImports:
+    def test_package_import(self, library):
+        pkg, _, _ = library
+        assert pkg is not None, "Main package failed to import"
+
+    def test_gisl_module_import(self, library):
+        _, gisl_mod, _ = library
+        assert gisl_mod is not None, "gisl module failed to import"
+
+    def test_gisl2_module_import(self, library):
+        _, _, gisl2_mod = library
+        assert gisl2_mod is not None, "gisl2 module failed to import"
+
+# ----------------------------------------------------------------------
+# 3. Direct JSON validation loop
+# ----------------------------------------------------------------------
+class TestDirectJSONValidation:
+    def test_json_schema_consistency(self, all_json_data):
+        required = {
+            "name", "rarity", "element", "weapon_type", "region", "birthday",
+            "affiliation", "role", "additional_titles", "constellation_name",
+            "ascension_stat", "ascension_materials", "ascension_levels",
+            "stats_table", "talents", "constellations"
+        }
+        errors = []
+
+        for key, data in all_json_data.items():
+            # Top‑level keys
+            missing = required - set(data.keys())
+            if missing:
+                errors.append(f"{key}: missing top‑level keys: {missing}")
+
+            # Basic types
+            if "rarity" in data and not isinstance(data["rarity"], int):
+                errors.append(f"{key}: rarity must be int")
+            for field in ["additional_titles", "talents", "constellations"]:
+                if field in data and not isinstance(data[field], list):
+                    errors.append(f"{key}: {field} must be list")
+            for field in ["ascension_levels", "stats_table"]:
+                if field in data and not isinstance(data[field], dict):
+                    errors.append(f"{key}: {field} must be dict")
+
+            # Ascension levels structure
+            if "ascension_levels" in data:
+                for mat_name, phases in data["ascension_levels"].items():
+                    if not isinstance(phases, dict):
+                        errors.append(f"{key}: ascension_levels['{mat_name}'] must be dict")
+                        continue
+                    for phase, info in phases.items():
+                        if not isinstance(info, dict):
+                            errors.append(f"{key}: ascension_levels['{mat_name}']['{phase}'] must be dict")
+                            continue
+                        for req in ["level_range", "amount", "link"]:
+                            if req not in info:
+                                errors.append(f"{key}: {mat_name}/{phase} missing {req}")
+
+            # Stats table structure
+            if "stats_table" in data:
+                required_tiers = ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A6 - C7", "A6 - C8"]
+                for tier in required_tiers:
+                    if tier not in data["stats_table"]:
+                        errors.append(f"{key}: missing stats tier {tier}")
+                        continue
+                    tier_data = data["stats_table"][tier]
+                    if "level_range" not in tier_data:
+                        errors.append(f"{key}: stats {tier} missing level_range")
+                    for sk, val in tier_data.items():
+                        if sk == "level_range":
+                            continue
+                        if not isinstance(val, dict):
+                            errors.append(f"{key}: stats {tier}/{sk} must be dict")
+                            continue
+                        if "low" not in val or "high" not in val:
+                            errors.append(f"{key}: stats {tier}/{sk} missing low/high")
+
+            # Talents structure
+            if "talents" in data:
+                for i, talent in enumerate(data["talents"]):
+                    if not isinstance(talent, dict):
+                        errors.append(f"{key}: talent[{i}] must be dict")
+                        continue
+                    if "name" not in talent or "type" not in talent:
+                        errors.append(f"{key}: talent[{i}] missing name/type")
+                    lm = talent.get("level_materials")
+                    if lm is not None and not isinstance(lm, (dict, str)):
+                        errors.append(f"{key}: talent[{i}].level_materials must be dict or string")
+                    if isinstance(lm, dict) and "level" in lm:
+                        if not isinstance(lm["level"], list):
+                            errors.append(f"{key}: talent[{i}].level_materials.level must be list")
+                        else:
+                            for j, entry in enumerate(lm["level"]):
+                                if not isinstance(entry, dict):
+                                    errors.append(f"{key}: talent[{i}].level[{j}] must be dict")
+                                    continue
+                                for req in ["material", "amount", "link"]:
+                                    if req not in entry:
+                                        errors.append(f"{key}: talent[{i}].level[{j}] missing {req}")
+
+            # Constellations structure
+            if "constellations" in data:
+                for i, const in enumerate(data["constellations"]):
+                    if not isinstance(const, dict):
+                        errors.append(f"{key}: constellation[{i}] must be dict")
+                        continue
+                    if "name" not in const or "description" not in const:
+                        errors.append(f"{key}: constellation[{i}] missing name/description")
+
+        assert not errors, "JSON validation errors:\n" + "\n".join(errors)
+
+# ----------------------------------------------------------------------
+# 4. Dynamic function coverage
+# ----------------------------------------------------------------------
+class TestDynamicFunctionCoverage:
+    def test_all_functions_with_known_params(self, library, all_character_keys):
+        pkg, gisl_mod, gisl2_mod = library
+        errors = []
+
+        # Gather all public functions from the three modules
+        functions = {}
+        for mod in (pkg, gisl_mod, gisl2_mod):
+            for name in dir(mod):
+                if name.startswith('_'):
+                    continue
+                obj = getattr(mod, name)
+                if inspect.isfunction(obj) or inspect.isbuiltin(obj):
+                    functions[f"{mod.__name__}.{name}"] = obj
+
+        # Data source mappings
+        data_sources = {
+            # character/name/key -> list of character keys from JSON files
+            "character": all_character_keys,
+            "character_key": all_character_keys,
+            "key": all_character_keys,
+            "name": all_character_keys,
+            # element -> hardcoded canonical elements
+            "element": ELEMENTS,
+            # weapon_type/weapon -> hardcoded canonical weapons
+            "weapon_type": WEAPONS,
+            "weapon": WEAPONS,
+            # material placeholders will be added later
+        }
+
+        for func_name, func in functions.items():
+            try:
+                sig = inspect.signature(func)
+            except (TypeError, ValueError):
+                # Skip functions whose signature cannot be inspected
+                continue
+
+            params = list(sig.parameters.values())
+
+            # No parameters: call once with no args
+            if not params:
+                try:
+                    result = func()
+                    if result is None:
+                        errors.append(f"{func_name} returned None")
+                except Exception as e:
+                    errors.append(f"{func_name} raised {e}")
+                continue
+
+            # Find first parameter that matches a known data source
+            test_param = None
+            for p in params:
+                if p.name in data_sources:
+                    test_param = p
+                    break
+
+            if test_param is None:
+                # No known parameter; if all required params have defaults, call once
+                has_required = any(p.default is inspect.Parameter.empty and p.kind in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                    inspect.Parameter.KEYWORD_ONLY
+                ) for p in params)
+                if not has_required:
+                    try:
+                        result = func()
+                        if result is None:
+                            errors.append(f"{func_name} returned None")
+                    except Exception as e:
+                        errors.append(f"{func_name} raised {e}")
+                # else: skip because we cannot safely call without required args
+                continue
+
+            # Check if all OTHER required parameters can be satisfied by defaults
+            can_call = True
+            for p in params:
+                if p is test_param:
+                    continue
+                if p.default is inspect.Parameter.empty and p.kind in (
+                    inspect.Parameter.POSITIONAL_ONLY,
+                    inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                    inspect.Parameter.KEYWORD_ONLY
+                ):
+                    can_call = False
+                    break
+
+            if not can_call:
+                # Skip functions with unsupplied required parameters
+                continue
+
+            # Iterate over the values for the matched parameter
+            test_values = data_sources[test_param.name]
+            for value in test_values:
+                try:
+                    kwargs = {test_param.name: value}
+                    result = func(**kwargs)
+                    if result is None:
+                        errors.append(f"{func_name}({test_param.name}={value!r}) returned None")
+                except Exception as e:
+                    errors.append(f"{func_name}({test_param.name}={value!r}) raised {e}")
+
+        assert not errors, "Dynamic function test errors:\n" + "\n".join(errors)
+
+# ----------------------------------------------------------------------
+# Optional: Run pytest if executed as script
+# ----------------------------------------------------------------------
 if __name__ == "__main__":
-    main()
+    sys.exit(pytest.main([__file__, "-v"]))
